@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
+#include "InputActionValue.h"
 
 AProjectVortexCharacter::AProjectVortexCharacter()
 {
@@ -48,4 +49,16 @@ AProjectVortexCharacter::AProjectVortexCharacter()
 void AProjectVortexCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+}
+
+void AProjectVortexCharacter::Move(const FInputActionValue& Value)
+{
+	FVector2D Movement2D = Value.Get<FVector2D>();
+	FVector MovementVector(Movement2D.X, Movement2D.Y, 0.0f);
+	AddMovementInput(MovementVector);
+}
+
+void AProjectVortexCharacter::Look(FRotator NewRotation)
+{
+	SetActorRotation(FQuat(NewRotation));
 }
