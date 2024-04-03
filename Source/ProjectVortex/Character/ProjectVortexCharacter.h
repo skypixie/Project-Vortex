@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "UserTypes.h"
 #include "ProjectVortexCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -32,6 +33,14 @@ private:
 	class USpringArmComponent* CameraBoom;
 
 public:
+	/* ----- VARIABLES ----- */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	EMovementState MovementState = EMovementState::Run_State;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	FCharacterSpeed MovementInfo;
+	
+
 	/* ----- FUNCTIONS ----- */
 
 	UFUNCTION(Category = Input)
@@ -39,5 +48,11 @@ public:
 
 	UFUNCTION(Category = Input)
 	void Look(FRotator NewRotation);
+
+	UFUNCTION(BlueprintCallable)
+	void CharacterUpdate();
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeMovementState(EMovementState NewMovementState);
 };
 

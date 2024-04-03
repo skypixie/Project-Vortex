@@ -5,7 +5,6 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
-#include "ProjectVortexCharacter.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -13,6 +12,7 @@
 #include "Kismet/KismetMathLibrary.h"
 
 #include "ProjectVortexCharacter.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 

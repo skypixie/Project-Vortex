@@ -62,3 +62,30 @@ void AProjectVortexCharacter::Look(FRotator NewRotation)
 {
 	SetActorRotation(FQuat(NewRotation));
 }
+
+void AProjectVortexCharacter::CharacterUpdate()
+{
+	float ResultSpeed = 600.0f;
+	switch (MovementState)
+	{
+	case EMovementState::Aim_State:
+		ResultSpeed = MovementInfo.AimSpeed;
+		break;
+	case EMovementState::Run_State:
+		ResultSpeed = MovementInfo.RunSpeed;
+		break;
+	case EMovementState::Walk_State:
+		ResultSpeed = MovementInfo.WalkSpeed;
+		break;
+	default:
+		break;
+	}
+
+	GetCharacterMovement()->MaxWalkSpeed = ResultSpeed;
+}
+
+void AProjectVortexCharacter::ChangeMovementState(EMovementState NewMovementState)
+{
+	MovementState = NewMovementState;
+	CharacterUpdate();
+}
