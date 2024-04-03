@@ -36,6 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
+	UPROPERTY(BlueprintReadWrite)
 	AProjectVortexCharacter* PossessedPawn;
 
 protected:
