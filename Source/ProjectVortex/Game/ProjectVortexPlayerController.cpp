@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "ProjectVortexCharacter.h"
 
@@ -34,6 +35,26 @@ void AProjectVortexPlayerController::BeginPlay()
 	}
 
 	PossessedPawn = Cast<AProjectVortexCharacter>(GetPawn());
+
+	// Print trace channels names
+	/*
+	for (int32 i = 0; i < ETraceTypeQuery::TraceTypeQuery_MAX; ++i)
+	{
+		ETraceTypeQuery EnumValue = static_cast<ETraceTypeQuery>(i);
+		FString EnumName = UEnum::GetValueAsString(EnumValue);
+		FString ChannelName = UEnum::GetValueAsString(UEngineTypes::ConvertToCollisionChannel(static_cast<ETraceTypeQuery>(i)));
+		UE_LOG(LogTemp, Log, TEXT("ETraceTypeQuery Name: %s"), *EnumName);
+		UE_LOG(LogTemp, Log, TEXT("Collision Channel Name: %s"), *ChannelName);
+	}
+	for (int32 i = 0; i < EObjectTypeQuery::ObjectTypeQuery_MAX; ++i)
+	{
+		EObjectTypeQuery EnumValue = static_cast<EObjectTypeQuery>(i);
+		FString EnumName = UEnum::GetValueAsString(EnumValue);
+		FString ChannelName = UEnum::GetValueAsString(UEngineTypes::ConvertToCollisionChannel(static_cast<EObjectTypeQuery>(i)));
+		UE_LOG(LogTemp, Log, TEXT("EObjectTypeQuery Name: %s"), *EnumName);
+		UE_LOG(LogTemp, Log, TEXT("Collision Channel Name: %s"), *ChannelName);
+	}
+	*/
 }
 
 void AProjectVortexPlayerController::OnMove(const FInputActionValue& Value)
@@ -74,9 +95,31 @@ void AProjectVortexPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FHitResult HitResult;
-	GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery6, false, HitResult);
-	float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), HitResult.Location).Yaw;
-	FRotator NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
-	PossessedPawn->Look(NewRotation);
+	if (IsValid(PossessedPawn))
+	{
+		FVector PawnLocation = PossessedPawn->GetActorLocation();
+		FHitResult HitResult;
+		GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery3, false, HitResult);
+		FRotator NewRotation;
+		if (HitResult.bBlockingHit)
+		{
+			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), HitResult.Location).Yaw;
+			NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
+		}
+		// works incorrectly
+		else
+		{
+			float MousePosX, MousePosY;
+			GetMousePosition(MousePosX, MousePosY);
+			FVector MouseWorldPosition, MouseWorldDirection;
+
+			UGameplayStatics::DeprojectScreenToWorld(this, FVector2D(MousePosX, MousePosY), MouseWorldPosition, MouseWorldDirection);
+
+			// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, FString::Printf(TEXT("%f %f %f"), MouseWorldPosition.X, MouseWorldPosition.Y, MouseWorldPosition.Z));
+
+			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), MouseWorldDirection).Yaw;
+			NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
+		}
+		PossessedPawn->Look(NewRotation);
+	}
 }

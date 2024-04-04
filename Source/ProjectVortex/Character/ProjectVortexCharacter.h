@@ -39,7 +39,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	FCharacterSpeed MovementInfo;
-	
 
 	/* ----- FUNCTIONS ----- */
 

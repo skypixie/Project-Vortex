@@ -74,9 +74,6 @@ void AProjectVortexCharacter::CharacterUpdate()
 	case EMovementState::Run_State:
 		ResultSpeed = MovementInfo.RunSpeed;
 		break;
-	case EMovementState::Walk_State:
-		ResultSpeed = MovementInfo.WalkSpeed;
-		break;
 	default:
 		break;
 	}
