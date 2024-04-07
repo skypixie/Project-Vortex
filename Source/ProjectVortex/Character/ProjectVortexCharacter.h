@@ -40,13 +40,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	FCharacterSpeed MovementInfo;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bIsSprintnig;
+
+	// Stamina for sprinting
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float SprintStamina = 100.0f;
+
 	/* ----- FUNCTIONS ----- */
 
 	UFUNCTION(Category = Input)
-	void Move(const FInputActionValue& Value);
+	void Move(FVector2D MovementVector);
 
 	UFUNCTION(Category = Input)
 	void Look(FRotator NewRotation);
+
+	UFUNCTION(Category = Input)
+	void Sprint();
 
 	UFUNCTION(BlueprintCallable)
 	void CharacterUpdate();

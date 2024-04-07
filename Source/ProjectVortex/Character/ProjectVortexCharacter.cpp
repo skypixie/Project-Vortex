@@ -51,11 +51,11 @@ void AProjectVortexCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
 }
 
-void AProjectVortexCharacter::Move(const FInputActionValue& Value)
+void AProjectVortexCharacter::Move(FVector2D MovementVector)
 {
-	FVector2D Movement2D = Value.Get<FVector2D>();
-	FVector MovementVector(Movement2D.X, Movement2D.Y, 0.0f);
-	AddMovementInput(MovementVector);
+	if (bIsSprintnig) return;
+	ChangeMovementState(EMovementState::Run_State);
+	AddMovementInput(FVector(MovementVector.X, MovementVector.Y, 0.0f));
 }
 
 void AProjectVortexCharacter::Look(FRotator NewRotation)
@@ -63,16 +63,22 @@ void AProjectVortexCharacter::Look(FRotator NewRotation)
 	SetActorRotation(FQuat(NewRotation));
 }
 
+void AProjectVortexCharacter::Sprint()
+{
+	ChangeMovementState(EMovementState::Sprint_State);
+	AddMovementInput(GetActorForwardVector());
+}
+
 void AProjectVortexCharacter::CharacterUpdate()
 {
 	float ResultSpeed = 600.0f;
 	switch (MovementState)
 	{
-	case EMovementState::Aim_State:
-		ResultSpeed = MovementInfo.AimSpeed;
-		break;
 	case EMovementState::Run_State:
 		ResultSpeed = MovementInfo.RunSpeed;
+		break;
+	case EMovementState::Sprint_State:
+		ResultSpeed = MovementInfo.SprintSpeed;
 		break;
 	default:
 		break;

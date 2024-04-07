@@ -36,6 +36,7 @@ void AProjectVortexPlayerController::BeginPlay()
 
 	PossessedPawn = Cast<AProjectVortexCharacter>(GetPawn());
 
+	GetWorld()->GetTimerManager().SetTimer(SprintTimerHandle, this, &AProjectVortexPlayerController::OnSprintTimer, 0.1f, true);
 	// Print trace channels names
 	/*
 	for (int32 i = 0; i < ETraceTypeQuery::TraceTypeQuery_MAX; ++i)
@@ -61,7 +62,42 @@ void AProjectVortexPlayerController::OnMove(const FInputActionValue& Value)
 {
 	if (IsValid(PossessedPawn))
 	{
-		PossessedPawn->Move(Value);
+		PossessedPawn->Move(Value.Get<FVector2D>());
+	}
+}
+
+void AProjectVortexPlayerController::OnSprint(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn) && PossessedPawn->SprintStamina)
+	{
+		PossessedPawn->bIsSprintnig = true;
+		PossessedPawn->Sprint();
+	}
+}
+
+void AProjectVortexPlayerController::OnSprintCompleted(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->bIsSprintnig = false;
+	}
+}
+
+void AProjectVortexPlayerController::OnSprintTimer()
+{
+	if (IsValid(PossessedPawn))
+	{
+		if (PossessedPawn->SprintStamina > 0 && PossessedPawn->bIsSprintnig)
+		{
+			PossessedPawn->SprintStamina -= 1;
+		}
+		else if (PossessedPawn->SprintStamina >= 0 && (!PossessedPawn->bIsSprintnig) && PossessedPawn->SprintStamina < 100)
+		{
+			PossessedPawn->SprintStamina += 1;
+		}
+
+
+		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, FString::Printf(TEXT("%f"), PossessedPawn->SprintStamina));
 	}
 }
 
@@ -73,8 +109,11 @@ void AProjectVortexPlayerController::SetupInputComponent()
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		// Setup keyboard movement
+		// Setup jogging
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnMove);
+		// Setup sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnSprintCompleted);
 	}
 	else
 	{
@@ -100,26 +139,25 @@ void AProjectVortexPlayerController::Tick(float DeltaTime)
 		FVector PawnLocation = PossessedPawn->GetActorLocation();
 		FHitResult HitResult;
 		GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery3, false, HitResult);
-		FRotator NewRotation;
 		if (HitResult.bBlockingHit)
 		{
 			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), HitResult.Location).Yaw;
-			NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
+			CharacterToCursorRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
 		}
 		// works incorrectly
-		else
-		{
-			float MousePosX, MousePosY;
-			GetMousePosition(MousePosX, MousePosY);
-			FVector MouseWorldPosition, MouseWorldDirection;
+		//else
+		//{
+		//	float MousePosX, MousePosY;
+		//	GetMousePosition(MousePosX, MousePosY);
+		//	FVector MouseWorldPosition, MouseWorldDirection;
 
-			UGameplayStatics::DeprojectScreenToWorld(this, FVector2D(MousePosX, MousePosY), MouseWorldPosition, MouseWorldDirection);
+		//	UGameplayStatics::DeprojectScreenToWorld(this, FVector2D(MousePosX, MousePosY), MouseWorldPosition, MouseWorldDirection);
 
-			// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, FString::Printf(TEXT("%f %f %f"), MouseWorldPosition.X, MouseWorldPosition.Y, MouseWorldPosition.Z));
+		//	// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, FString::Printf(TEXT("%f %f %f"), MouseWorldPosition.X, MouseWorldPosition.Y, MouseWorldPosition.Z));
 
-			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), MouseWorldDirection).Yaw;
-			NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
-		}
-		PossessedPawn->Look(NewRotation);
+		//	float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), MouseWorldDirection).Yaw;
+		//	NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
+		//}
+		PossessedPawn->Look(CharacterToCursorRotation);
 	}
 }
