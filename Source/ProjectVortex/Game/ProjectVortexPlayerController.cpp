@@ -97,7 +97,7 @@ void AProjectVortexPlayerController::OnSprintTimer()
 		}
 
 
-		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, FString::Printf(TEXT("%f"), PossessedPawn->SprintStamina));
+		// GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, FString::Printf(TEXT("%f"), PossessedPawn->SprintStamina));
 	}
 }
 
@@ -143,6 +143,7 @@ void AProjectVortexPlayerController::Tick(float DeltaTime)
 		{
 			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), HitResult.Location).Yaw;
 			CharacterToCursorRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
+			// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, TEXT("hit"));
 		}
 		// works incorrectly
 		//else
