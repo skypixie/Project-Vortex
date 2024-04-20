@@ -74,6 +74,9 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # Imported assests
+
 Content/Environment/Crystal_cave
+# Duplicated in Character/Animations for another skeleton
+Content/AnimStarterPack
 # Deleted so not sure if necessary here
 Content/ParagonRevenant
