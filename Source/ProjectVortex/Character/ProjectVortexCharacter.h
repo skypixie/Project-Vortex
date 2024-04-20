@@ -47,6 +47,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintStamina = 100.0f;
 
+	/* --- BATTLING --- */
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	bool bIsShooting;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	float RateOfShooting = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	TSubclassOf<class AProjectileDefault> Projectile = nullptr;
+
+	// Timer
+	float ShootTime = 0.0f;
+
 	/* ----- FUNCTIONS ----- */
 
 	UFUNCTION(Category = Input)
@@ -58,10 +72,23 @@ public:
 	UFUNCTION(Category = Input)
 	void Sprint();
 
+	UFUNCTION(Category = "Input")
+	void Shoot();
+
 	UFUNCTION(BlueprintCallable)
 	void CharacterUpdate();
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementState(EMovementState NewMovementState);
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponStateShooting();
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckWeaponCanShoot();
+
+	UFUNCTION()
+	void ShootTick(float DeltaTime);
+
 };
 

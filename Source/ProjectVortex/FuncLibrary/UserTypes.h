@@ -24,6 +24,17 @@ struct FCharacterSpeed
 	float SprintSpeed = 900.0f;
 };
 
+//USTRUCT(BlueprintType)
+//struct FBoosterInfo
+//{
+//	GENERATED_BODY()
+//
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BoosterSetting")
+//	TSubclassOf<class ABoosterDefault> Booster = nullptr;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BoosterSetting")
+//	float BoostDamage = 10;
+//};
+
 UCLASS()
 class PROJECTVORTEX_API UUserTypes : public UBlueprintFunctionLibrary
 {

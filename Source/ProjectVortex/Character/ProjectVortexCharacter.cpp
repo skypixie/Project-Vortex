@@ -12,6 +12,8 @@
 #include "Engine/World.h"
 #include "InputActionValue.h"
 
+#include "Weapons/Projectiles/ProjectileDefault.h"
+
 AProjectVortexCharacter::AProjectVortexCharacter()
 {
 	// Set size for player capsule
@@ -69,6 +71,27 @@ void AProjectVortexCharacter::Sprint()
 	AddMovementInput(GetActorForwardVector());
 }
 
+void AProjectVortexCharacter::Shoot()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, TEXT("shooting"));
+	ShootTime = RateOfShooting;
+	
+	FVector ShootLocation = GetActorForwardVector();
+	FVector SpawnLocation = GetMesh()->GetSocketLocation(TEXT("BulletSocket"));
+	FRotator SpawnRotation = GetActorRotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = this;
+
+	AProjectileDefault* MyProjectile = Cast<AProjectileDefault>(GetWorld()->SpawnActor(Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
+	if (MyProjectile)
+	{
+		MyProjectile->InitialLifeSpan = 20.f;
+	}
+}
+
 void AProjectVortexCharacter::CharacterUpdate()
 {
 	float ResultSpeed = 600.0f;
@@ -91,4 +114,26 @@ void AProjectVortexCharacter::ChangeMovementState(EMovementState NewMovementStat
 {
 	MovementState = NewMovementState;
 	CharacterUpdate();
+}
+
+void AProjectVortexCharacter::SetWeaponStateShooting()
+{
+	if (!CheckWeaponCanShoot())
+	{
+		bIsShooting = false;
+	}
+}
+
+bool AProjectVortexCharacter::CheckWeaponCanShoot()
+{
+	return true;
+}
+
+void AProjectVortexCharacter::ShootTick(float DeltaTime)
+{
+	if (bIsShooting)
+	{
+		if (ShootTime < 0.f) Shoot();
+		else ShootTime -= DeltaTime;
+	}
 }

@@ -101,6 +101,14 @@ void AProjectVortexPlayerController::OnSprintTimer()
 	}
 }
 
+void AProjectVortexPlayerController::OnShoot(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->Shoot();
+	}
+}
+
 void AProjectVortexPlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -114,6 +122,8 @@ void AProjectVortexPlayerController::SetupInputComponent()
 		// Setup sprinting
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnSprintCompleted);
+		// Setup Battling
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnShoot);
 	}
 	else
 	{
@@ -138,7 +148,7 @@ void AProjectVortexPlayerController::Tick(float DeltaTime)
 	{
 		FVector PawnLocation = PossessedPawn->GetActorLocation();
 		FHitResult HitResult;
-		GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery3, false, HitResult);
+		GetHitResultUnderCursor(ECC_GameTraceChannel1, true, HitResult);
 		if (HitResult.bBlockingHit)
 		{
 			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), HitResult.Location).Yaw;
