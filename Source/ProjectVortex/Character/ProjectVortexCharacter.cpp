@@ -13,6 +13,7 @@
 #include "InputActionValue.h"
 
 #include "Weapons/Projectiles/ProjectileDefault.h"
+#include "Weapons/WeaponDefault.h"
 
 AProjectVortexCharacter::AProjectVortexCharacter()
 {
@@ -51,6 +52,13 @@ AProjectVortexCharacter::AProjectVortexCharacter()
 void AProjectVortexCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+}
+
+void AProjectVortexCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitWeapon();
 }
 
 void AProjectVortexCharacter::Move(FVector2D MovementVector)
@@ -92,11 +100,26 @@ void AProjectVortexCharacter::Shoot()
 	}
 }
 
+void AProjectVortexCharacter::Aim()
+{
+	ChangeMovementState(EMovementState::Aim_State);
+	bIsAiming = true;
+}
+
+void AProjectVortexCharacter::AimCompleted()
+{
+	ChangeMovementState(EMovementState::Run_State);
+	bIsAiming = false;
+}
+
 void AProjectVortexCharacter::CharacterUpdate()
 {
 	float ResultSpeed = 600.0f;
 	switch (MovementState)
 	{
+	case EMovementState::Aim_State:
+		ResultSpeed = MovementInfo.AimSpeed;
+		break;
 	case EMovementState::Run_State:
 		ResultSpeed = MovementInfo.RunSpeed;
 		break;
@@ -136,4 +159,31 @@ void AProjectVortexCharacter::ShootTick(float DeltaTime)
 		if (ShootTime < 0.f) Shoot();
 		else ShootTime -= DeltaTime;
 	}
+}
+
+void AProjectVortexCharacter::InitWeapon()
+{
+	if (InitWeaponClass)
+	{
+		FVector SpawnLocation = FVector(0);
+		FRotator SpawnRotation = FRotator(0);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Owner = GetOwner();
+		SpawnParams.Instigator = GetInstigator();
+
+		AWeaponDefault* MyWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
+		if (MyWeapon)
+		{
+			FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+			MyWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+			CurrentWeapon = MyWeapon;
+		}
+	}
+}
+
+AWeaponDefault* AProjectVortexCharacter::GetCurrentWeapon()
+{
+	return CurrentWeapon;
 }

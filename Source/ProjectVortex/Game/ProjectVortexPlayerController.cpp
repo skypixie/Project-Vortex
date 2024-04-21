@@ -109,6 +109,22 @@ void AProjectVortexPlayerController::OnShoot(const FInputActionValue& Value)
 	}
 }
 
+void AProjectVortexPlayerController::OnAim(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->Aim();
+	}
+}
+
+void AProjectVortexPlayerController::OnAimCompleted(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->AimCompleted();
+	}
+}
+
 void AProjectVortexPlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -124,6 +140,8 @@ void AProjectVortexPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnSprintCompleted);
 		// Setup Battling
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnShoot);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnAim);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnAimCompleted);
 	}
 	else
 	{

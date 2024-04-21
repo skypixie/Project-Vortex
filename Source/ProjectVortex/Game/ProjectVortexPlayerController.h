@@ -44,6 +44,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ShootAction;
 
+	/** Aim Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AimAction;
+
 	UPROPERTY(BlueprintReadWrite)
 	AProjectVortexCharacter* PossessedPawn;
 
@@ -73,5 +77,9 @@ protected:
 	void OnSprintTimer();
 
 	void OnShoot(const FInputActionValue& Value);
+
+	void OnAim(const FInputActionValue& Value);
+
+	void OnAimCompleted(const FInputActionValue& Value);
 };
 

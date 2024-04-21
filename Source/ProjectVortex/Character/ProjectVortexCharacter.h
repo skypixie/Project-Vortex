@@ -7,6 +7,8 @@
 #include "UserTypes.h"
 #include "ProjectVortexCharacter.generated.h"
 
+class AWeaponDefault;
+
 UCLASS(Blueprintable)
 class AProjectVortexCharacter : public ACharacter
 {
@@ -17,6 +19,8 @@ public:
 
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void BeginPlay() override;
 
 	/** Returns TopDownCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
@@ -43,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bIsSprintnig;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bIsAiming;
+
 	// Stamina for sprinting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintStamina = 100.0f;
@@ -58,6 +65,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 	TSubclassOf<class AProjectileDefault> Projectile = nullptr;
 
+	// Weapon
+	AWeaponDefault* CurrentWeapon = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AWeaponDefault> InitWeaponClass = nullptr;
+
 	// Timer
 	float ShootTime = 0.0f;
 
@@ -72,8 +85,14 @@ public:
 	UFUNCTION(Category = Input)
 	void Sprint();
 
-	UFUNCTION(Category = "Input")
+	UFUNCTION(Category = Input)
 	void Shoot();
+
+	UFUNCTION(Category = "Input")
+	void Aim();
+
+	UFUNCTION(Category = "Input")
+	void AimCompleted();
 
 	UFUNCTION(BlueprintCallable)
 	void CharacterUpdate();
@@ -90,5 +109,10 @@ public:
 	UFUNCTION()
 	void ShootTick(float DeltaTime);
 
+	UFUNCTION()
+	void InitWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	AWeaponDefault* GetCurrentWeapon();
 };
 
