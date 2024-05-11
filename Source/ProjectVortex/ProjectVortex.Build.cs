@@ -8,13 +8,15 @@ public class ProjectVortex : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "NavigationSystem", "AIModule", "Niagara", "EnhancedInput" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "NavigationSystem", "AIModule", "Niagara", "EnhancedInput", "PhysicsCore" });
         PublicIncludePaths.AddRange(new string[]
         {
             "ProjectVortex/Character",
             "ProjectVortex/FuncLibrary",
             "ProjectVortex/Game",
-            "ProjectVortex"
+            "ProjectVortex/Weapons",
+            "ProjectVortex/Structure",
+            "ProjectVortex",
         });
     }
 }

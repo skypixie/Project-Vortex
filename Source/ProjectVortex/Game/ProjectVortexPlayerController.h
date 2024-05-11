@@ -48,16 +48,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AimAction;
 
-	UPROPERTY(BlueprintReadWrite)
+	/** Reload Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Character")
 	AProjectVortexCharacter* PossessedPawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	FRotator CharacterToCursorRotation = FRotator(0.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	FVector CursorLocation = FVector(0);
 
 	FTimerHandle SprintTimerHandle;
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
-
-	FRotator CharacterToCursorRotation = FRotator(0.0f);
 
 	virtual void SetupInputComponent() override;
 
@@ -76,10 +84,14 @@ protected:
 
 	void OnSprintTimer();
 
-	void OnShoot(const FInputActionValue& Value);
+	void OnAttackStarted(const FInputActionValue& Value);
+
+	void OnAttackCompleted(const FInputActionValue& Value);
 
 	void OnAim(const FInputActionValue& Value);
 
 	void OnAimCompleted(const FInputActionValue& Value);
+
+	void OnReload(const FInputActionValue& Value);
 };
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "UserTypes.h"
+#include "FuncLibrary/UserTypes.h"
 #include "ProjectVortexCharacter.generated.h"
 
 class AWeaponDefault;
@@ -68,8 +68,8 @@ public:
 	// Weapon
 	AWeaponDefault* CurrentWeapon = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AWeaponDefault> InitWeaponClass = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
+	FName InitWeaponName;
 
 	// Timer
 	float ShootTime = 0.0f;
@@ -80,13 +80,10 @@ public:
 	void Move(FVector2D MovementVector);
 
 	UFUNCTION(Category = Input)
-	void Look(FRotator NewRotation);
+	void Look(FRotator NewRotation, FVector CursorLocation);
 
 	UFUNCTION(Category = Input)
 	void Sprint();
-
-	UFUNCTION(Category = Input)
-	void Shoot();
 
 	UFUNCTION(Category = "Input")
 	void Aim();
@@ -100,19 +97,29 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementState(EMovementState NewMovementState);
 
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponStateShooting();
+	UFUNCTION()
+	void InitWeapon(FName IdWeapon);
 
 	UFUNCTION(BlueprintCallable)
-	bool CheckWeaponCanShoot();
+	void TryReloadWeapon();
 
 	UFUNCTION()
-	void ShootTick(float DeltaTime);
+	void WeaponReloadStart(UAnimMontage* Anim);
 
 	UFUNCTION()
-	void InitWeapon();
+	void WeaponReloadEnd();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void WeaponReloadStart_BP(UAnimMontage* Anim);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void WeaponReloadEnd_BP();
 
 	UFUNCTION(BlueprintCallable)
 	AWeaponDefault* GetCurrentWeapon();
+
+
+	UFUNCTION(BlueprintCallable)
+	void AttackCharEvent(bool IsAttacking);
 };
 

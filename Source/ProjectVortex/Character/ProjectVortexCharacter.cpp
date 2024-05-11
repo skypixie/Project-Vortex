@@ -14,6 +14,7 @@
 
 #include "Weapons/Projectiles/ProjectileDefault.h"
 #include "Weapons/WeaponDefault.h"
+#include "Game/PVXGameInstance.h"
 
 AProjectVortexCharacter::AProjectVortexCharacter()
 {
@@ -58,7 +59,7 @@ void AProjectVortexCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitWeapon();
+	InitWeapon(InitWeaponName);
 }
 
 void AProjectVortexCharacter::Move(FVector2D MovementVector)
@@ -68,36 +69,35 @@ void AProjectVortexCharacter::Move(FVector2D MovementVector)
 	AddMovementInput(FVector(MovementVector.X, MovementVector.Y, 0.0f));
 }
 
-void AProjectVortexCharacter::Look(FRotator NewRotation)
+void AProjectVortexCharacter::Look(FRotator NewRotation, FVector CursorLocation)
 {
 	SetActorRotation(FQuat(NewRotation));
+	if (CurrentWeapon)
+	{
+		FVector Displacement = FVector(0);
+		switch (MovementState) {
+		case EMovementState::Aim_State:
+			Displacement = FVector(0.f, 0.f, 160.f);
+			CurrentWeapon->ShouldReduceDispersion = true;
+			break;
+		case EMovementState::Run_State:
+			Displacement = FVector(0.f, 0.f, 120.f);
+			CurrentWeapon->ShouldReduceDispersion = false;
+			break;
+		case EMovementState::Sprint_State:
+			break;
+		default:
+			break;
+		}
+
+		CurrentWeapon->ShootEndLocation = CursorLocation + Displacement;
+	}
 }
 
 void AProjectVortexCharacter::Sprint()
 {
 	ChangeMovementState(EMovementState::Sprint_State);
 	AddMovementInput(GetActorForwardVector());
-}
-
-void AProjectVortexCharacter::Shoot()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, TEXT("shooting"));
-	ShootTime = RateOfShooting;
-	
-	FVector ShootLocation = GetActorForwardVector();
-	FVector SpawnLocation = GetMesh()->GetSocketLocation(TEXT("BulletSocket"));
-	FRotator SpawnRotation = GetActorRotation();
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = this;
-
-	AProjectileDefault* MyProjectile = Cast<AProjectileDefault>(GetWorld()->SpawnActor(Projectile, &SpawnLocation, &SpawnRotation, SpawnParams));
-	if (MyProjectile)
-	{
-		MyProjectile->InitialLifeSpan = 20.f;
-	}
 }
 
 void AProjectVortexCharacter::Aim()
@@ -137,48 +137,49 @@ void AProjectVortexCharacter::ChangeMovementState(EMovementState NewMovementStat
 {
 	MovementState = NewMovementState;
 	CharacterUpdate();
-}
-
-void AProjectVortexCharacter::SetWeaponStateShooting()
-{
-	if (!CheckWeaponCanShoot())
+	if (CurrentWeapon)
 	{
-		bIsShooting = false;
+		CurrentWeapon->UpdateStateWeapon(NewMovementState);
 	}
 }
 
-bool AProjectVortexCharacter::CheckWeaponCanShoot()
+void AProjectVortexCharacter::InitWeapon(FName IdWeapon)
 {
-	return true;
-}
-
-void AProjectVortexCharacter::ShootTick(float DeltaTime)
-{
-	if (bIsShooting)
+	UPVXGameInstance* MyGI = Cast<UPVXGameInstance>(GetGameInstance());
+	FWeaponInfo MyWeaponInfo;
+	if (MyGI)
 	{
-		if (ShootTime < 0.f) Shoot();
-		else ShootTime -= DeltaTime;
-	}
-}
-
-void AProjectVortexCharacter::InitWeapon()
-{
-	if (InitWeaponClass)
-	{
-		FVector SpawnLocation = FVector(0);
-		FRotator SpawnRotation = FRotator(0);
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Owner = GetOwner();
-		SpawnParams.Instigator = GetInstigator();
-
-		AWeaponDefault* MyWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
-		if (MyWeapon)
+		if (MyGI->GetWeaponInfoByName(IdWeapon, MyWeaponInfo))
 		{
-			FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
-			MyWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
-			CurrentWeapon = MyWeapon;
+			if (MyWeaponInfo.WeaponClass)
+			{
+				FVector SpawnLocation = FVector(0);
+				FRotator SpawnRotation = FRotator(0);
+
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				SpawnParams.Owner = GetOwner();
+				SpawnParams.Instigator = GetInstigator();
+
+				AWeaponDefault* MyWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
+				if (MyWeapon)
+				{
+					FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+					MyWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+					CurrentWeapon = MyWeapon;
+
+					MyWeapon->WeaponSetting = MyWeaponInfo;
+					MyWeapon->WeaponInfo.Round = MyWeaponInfo.MaxRound;
+
+					// DEBUG !!! DELETE
+					MyWeapon->ReloadTime = MyWeaponInfo.ReloadTime;
+
+					MyWeapon->UpdateStateWeapon(MovementState);
+
+					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &AProjectVortexCharacter::WeaponReloadStart);
+					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &AProjectVortexCharacter::WeaponReloadEnd);
+				}
+			}
 		}
 	}
 }
@@ -186,4 +187,43 @@ void AProjectVortexCharacter::InitWeapon()
 AWeaponDefault* AProjectVortexCharacter::GetCurrentWeapon()
 {
 	return CurrentWeapon;
+}
+
+void AProjectVortexCharacter::WeaponReloadStart(UAnimMontage* Anim)
+{
+	WeaponReloadStart_BP(Anim);
+}
+
+void AProjectVortexCharacter::WeaponReloadEnd()
+{
+	WeaponReloadEnd_BP();
+}
+
+void AProjectVortexCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* Anim)
+{
+}
+
+void AProjectVortexCharacter::WeaponReloadEnd_BP_Implementation()
+{
+}
+
+void AProjectVortexCharacter::TryReloadWeapon()
+{
+	if (CurrentWeapon)
+	{
+		if (CurrentWeapon->GetWeaponRound() <= CurrentWeapon->WeaponSetting.MaxRound)
+		{
+			CurrentWeapon->InitReload();
+		}
+	}
+}
+
+void AProjectVortexCharacter::AttackCharEvent(bool IsAttacking)
+{
+	AWeaponDefault* MyWeapon = nullptr;
+	MyWeapon = GetCurrentWeapon();
+	if (MyWeapon)
+	{
+		MyWeapon->SetWeaponStateFire(IsAttacking);
+	}
 }

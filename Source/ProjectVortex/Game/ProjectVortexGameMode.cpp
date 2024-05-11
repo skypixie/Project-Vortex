@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "ProjectVortexGameMode.h"
-#include "ProjectVortexPlayerController.h"
-#include "ProjectVortexCharacter.h"
+#include "Game/ProjectVortexGameMode.h"
+#include "Game/ProjectVortexPlayerController.h"
+#include "Character/ProjectVortexCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AProjectVortexGameMode::AProjectVortexGameMode()

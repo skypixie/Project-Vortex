@@ -12,7 +12,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
-#include "ProjectVortexCharacter.h"
+#include "Character/ProjectVortexCharacter.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -101,11 +101,19 @@ void AProjectVortexPlayerController::OnSprintTimer()
 	}
 }
 
-void AProjectVortexPlayerController::OnShoot(const FInputActionValue& Value)
+void AProjectVortexPlayerController::OnAttackStarted(const FInputActionValue& Value)
 {
 	if (IsValid(PossessedPawn))
 	{
-		PossessedPawn->Shoot();
+		PossessedPawn->AttackCharEvent(true);
+	}
+}
+
+void AProjectVortexPlayerController::OnAttackCompleted(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->AttackCharEvent(false);
 	}
 }
 
@@ -125,6 +133,14 @@ void AProjectVortexPlayerController::OnAimCompleted(const FInputActionValue& Val
 	}
 }
 
+void AProjectVortexPlayerController::OnReload(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->TryReloadWeapon();
+	}
+}
+
 void AProjectVortexPlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -139,9 +155,13 @@ void AProjectVortexPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnSprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnSprintCompleted);
 		// Setup Battling
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnShoot);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnAttackStarted);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnAttackCompleted);
+
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnAim);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnAimCompleted);
+
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnReload);
 	}
 	else
 	{
@@ -171,22 +191,9 @@ void AProjectVortexPlayerController::Tick(float DeltaTime)
 		{
 			float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), HitResult.Location).Yaw;
 			CharacterToCursorRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
+			CursorLocation = HitResult.Location;
 			// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, TEXT("hit"));
 		}
-		// works incorrectly
-		//else
-		//{
-		//	float MousePosX, MousePosY;
-		//	GetMousePosition(MousePosX, MousePosY);
-		//	FVector MouseWorldPosition, MouseWorldDirection;
-
-		//	UGameplayStatics::DeprojectScreenToWorld(this, FVector2D(MousePosX, MousePosY), MouseWorldPosition, MouseWorldDirection);
-
-		//	// GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, FString::Printf(TEXT("%f %f %f"), MouseWorldPosition.X, MouseWorldPosition.Y, MouseWorldPosition.Z));
-
-		//	float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(PossessedPawn->GetActorLocation(), MouseWorldDirection).Yaw;
-		//	NewRotation = FRotator(0.0f, FindRotatorResultYaw, 0.0f);
-		//}
-		PossessedPawn->Look(CharacterToCursorRotation);
+		PossessedPawn->Look(CharacterToCursorRotation, CursorLocation);
 	}
 }
