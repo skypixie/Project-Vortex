@@ -26,7 +26,13 @@ public:
 
 	virtual void ImpactProjectile() override;
 
+	virtual void InitProjectile(FProjectileInfo InitParam) override;
+
 	void Explode();
+
+	// Debug
+	UFUNCTION(BlueprintCallable, Category = "Debug")
+	void DrawExplosionSphere();
 
 public:
 	bool TimerEnabled = false;

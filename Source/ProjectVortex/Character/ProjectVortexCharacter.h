@@ -93,7 +93,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CharacterUpdate();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementState(EMovementState NewMovementState);
 

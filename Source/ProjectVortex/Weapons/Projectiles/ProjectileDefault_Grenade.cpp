@@ -34,12 +34,20 @@ void AProjectileDefault_Grenade::TimerExplose(float DeltaTime)
 void AProjectileDefault_Grenade::BulletCollisionSphereHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::BulletCollisionSphereHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	// unnecessary effect appears
 }
 
 void AProjectileDefault_Grenade::ImpactProjectile()
 {
 	// Init grenade
 	TimerEnabled = true;
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Impact"));
+}
+
+void AProjectileDefault_Grenade::InitProjectile(FProjectileInfo InitParam)
+{
+	Super::InitProjectile(InitParam);
+	TimeToExplose = InitParam.TimeToExplose;
 }
 
 void AProjectileDefault_Grenade::Explode()
@@ -58,13 +66,52 @@ void AProjectileDefault_Grenade::Explode()
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
 		GetWorld(),
 		ProjectileSetting.ExploseMaxDamage,
-		ProjectileSetting.ExploseMaxDamage * 0.2f,
+		ProjectileSetting.ExploseMinDamage,
 		GetActorLocation(),
-		1000.f,
-		2000.f,
-		5,
+		ProjectileSetting.MinRadiusDamage,
+		ProjectileSetting.MaxRadiusDamage,
+		ProjectileSetting.DamageFalloff,
 		NULL, IgnoredActor, nullptr, nullptr
 	);
 
+	if (bShowDebug) DrawExplosionSphere();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Explode"));
+
 	Destroy();
+}
+
+void AProjectileDefault_Grenade::DrawExplosionSphere()
+{
+	// Min damage
+	DrawDebugSphere(
+		GetWorld(),
+		GetActorLocation(),
+		ProjectileSetting.MaxRadiusDamage,
+		32,
+		FColor::Blue,
+		false,
+		2.0f
+	);
+
+	// 50% damage
+	DrawDebugSphere(
+		GetWorld(),
+		GetActorLocation(),
+		(ProjectileSetting.MaxRadiusDamage + ProjectileSetting.MinRadiusDamage) / 2.f,
+		32,
+		FColor::Green,
+		false,
+		2.0f
+	);
+
+	// Max damage
+	DrawDebugSphere(
+		GetWorld(),
+		GetActorLocation(),
+		ProjectileSetting.MinRadiusDamage,
+		32,
+		FColor::Red,
+		false,
+		2.0f
+	);
 }

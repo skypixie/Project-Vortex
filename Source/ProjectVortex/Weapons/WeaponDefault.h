@@ -44,21 +44,36 @@ public:
 	FAdditionalWeaponInfo WeaponInfo;
 
 	// Flags
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire Logic")
 	bool bWeaponFiring = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire Logic")
+	bool bWeaponAiming = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire Logic")
 	bool bBlockFire = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ReloadLogic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload Logic")
 	bool bWeaponReloading = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Mesh Logic")
+	bool bDropShellFlag = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Mesh Logic")
+	bool bDropClipFlag = false;
+
 	// Timer
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fire Logic")
 	float FireTimer = 0.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ReloadLogic")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload Logic")
 	float ReloadTimer = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Mesh Logic")
+	float DropShellTimer = -1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop Mesh Logic")
+	float DropClipTimer = -1.0f;
 
 	// Dispersion
 	bool ShouldReduceDispersion = false;
@@ -74,11 +89,11 @@ public:
 	float SizeVectorToChangeShootDirectionLogic = 300.f;
 
 	// DELETE !!! DEBUG
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ReloadLogic Debug")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reload Logic Debug")
 	float ReloadTime = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool ShowDebug = true;
+	bool ShowDebug = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -102,6 +117,10 @@ public:
 
 	void DispersionTick(float DeltaTime);
 
+	void ShellDropTick(float DeltaTime);
+
+	void ClipDropTick(float DeltaTime);
+
 	void Fire();
 
 	FProjectileInfo GetProjectile();
@@ -114,6 +133,9 @@ public:
 
 	UFUNCTION()
 	void FinishReload();
+
+	UFUNCTION()
+	void InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDirection, float LifeTimeMesh, float ImpulseRandomDispersion, float PowerImpulse, float CustomMass);
 
 	void UpdateStateWeapon(EMovementState NewMovementState);
 	void ChangeDispersionByShot();

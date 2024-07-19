@@ -201,6 +201,7 @@ void AProjectVortexCharacter::WeaponReloadEnd()
 
 void AProjectVortexCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* Anim)
 {
+	GetMesh()->GetAnimInstance()->Montage_Play(Anim);
 }
 
 void AProjectVortexCharacter::WeaponReloadEnd_BP_Implementation()
