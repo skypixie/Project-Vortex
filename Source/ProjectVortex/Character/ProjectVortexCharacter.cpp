@@ -15,6 +15,7 @@
 #include "Weapons/Projectiles/ProjectileDefault.h"
 #include "Weapons/WeaponDefault.h"
 #include "Game/PVXGameInstance.h"
+#include "InventoryComponent.h"
 
 AProjectVortexCharacter::AProjectVortexCharacter()
 {
@@ -45,6 +46,12 @@ AProjectVortexCharacter::AProjectVortexCharacter()
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	if (InventoryComp)
+	{
+		InventoryComp->OnSwitchWeapon.AddDynamic(this, &AProjectVortexCharacter::InitWeapon);
+	}
+
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -59,7 +66,7 @@ void AProjectVortexCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitWeapon(InitWeaponName);
+	//InitWeapon(InitWeaponName, FAdditionalWeaponInfo());
 }
 
 void AProjectVortexCharacter::Move(FVector2D MovementVector)
@@ -143,8 +150,14 @@ void AProjectVortexCharacter::ChangeMovementState(EMovementState NewMovementStat
 	}
 }
 
-void AProjectVortexCharacter::InitWeapon(FName IdWeapon)
+void AProjectVortexCharacter::InitWeapon(FName IdWeapon, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon)
 {
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Destroy();
+		CurrentWeapon = nullptr;
+	}
+
 	UPVXGameInstance* MyGI = Cast<UPVXGameInstance>(GetGameInstance());
 	FWeaponInfo MyWeaponInfo;
 	if (MyGI)
@@ -158,7 +171,7 @@ void AProjectVortexCharacter::InitWeapon(FName IdWeapon)
 
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				SpawnParams.Owner = GetOwner();
+				SpawnParams.Owner = this;
 				SpawnParams.Instigator = GetInstigator();
 
 				AWeaponDefault* MyWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(MyWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
@@ -169,19 +182,34 @@ void AProjectVortexCharacter::InitWeapon(FName IdWeapon)
 					CurrentWeapon = MyWeapon;
 
 					MyWeapon->WeaponSetting = MyWeaponInfo;
-					MyWeapon->WeaponInfo.Round = MyWeaponInfo.MaxRound;
 
 					// DEBUG !!! DELETE
 					MyWeapon->ReloadTime = MyWeaponInfo.ReloadTime;
 
 					MyWeapon->UpdateStateWeapon(MovementState);
 
+					MyWeapon->WeaponInfo = WeaponAdditionalInfo;
+
+					CurrentIndexWeapon = NewCurrentIndexWeapon;
+
+
 					MyWeapon->OnWeaponReloadStart.AddDynamic(this, &AProjectVortexCharacter::WeaponReloadStart);
 					MyWeapon->OnWeaponReloadEnd.AddDynamic(this, &AProjectVortexCharacter::WeaponReloadEnd);
+					MyWeapon->OnWeaponFireStart.AddDynamic(this, &AProjectVortexCharacter::WeaponFireStart);
+
+					if (CurrentWeapon->GetWeaponRound() <= 0 && CurrentWeapon->CheckCanWeaponReload())
+						CurrentWeapon->InitReload();
+
+					if (InventoryComp)
+						InventoryComp->OnWeaponAmmoAvailable.Broadcast(MyWeapon->WeaponSetting.WeaponType);
 				}
 			}
 		}
 	}
+}
+
+void AProjectVortexCharacter::WeaponFireStart_BP_Implementation(UAnimMontage* Anim)
+{
 }
 
 AWeaponDefault* AProjectVortexCharacter::GetCurrentWeapon()
@@ -191,12 +219,19 @@ AWeaponDefault* AProjectVortexCharacter::GetCurrentWeapon()
 
 void AProjectVortexCharacter::WeaponReloadStart(UAnimMontage* Anim)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, TEXT("WeaponReloadStart"));
 	WeaponReloadStart_BP(Anim);
 }
 
-void AProjectVortexCharacter::WeaponReloadEnd()
+void AProjectVortexCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoTake)
 {
-	WeaponReloadEnd_BP();
+	if (InventoryComp)
+	{
+		InventoryComp->AmmoSlotChangeValue(CurrentWeapon->WeaponSetting.WeaponType, AmmoTake);
+		InventoryComp->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->WeaponInfo);
+	}
+
+	WeaponReloadEnd_BP(bIsSuccess);
 }
 
 void AProjectVortexCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* Anim)
@@ -204,15 +239,25 @@ void AProjectVortexCharacter::WeaponReloadStart_BP_Implementation(UAnimMontage* 
 	GetMesh()->GetAnimInstance()->Montage_Play(Anim);
 }
 
-void AProjectVortexCharacter::WeaponReloadEnd_BP_Implementation()
+void AProjectVortexCharacter::WeaponReloadEnd_BP_Implementation(bool bIsSuccess)
 {
+}
+
+void AProjectVortexCharacter::WeaponFireStart(UAnimMontage* Anim)
+{
+	if (InventoryComp && CurrentWeapon)
+	{
+		InventoryComp->SetAdditionalInfoWeapon(CurrentIndexWeapon, CurrentWeapon->WeaponInfo);
+	}
+
+	WeaponFireStart_BP(Anim);
 }
 
 void AProjectVortexCharacter::TryReloadWeapon()
 {
-	if (CurrentWeapon)
+	if (CurrentWeapon && ! CurrentWeapon->bWeaponReloading)
 	{
-		if (CurrentWeapon->GetWeaponRound() <= CurrentWeapon->WeaponSetting.MaxRound)
+		if (CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSetting.MaxRound && CurrentWeapon->CheckCanWeaponReload())
 		{
 			CurrentWeapon->InitReload();
 		}
@@ -223,8 +268,67 @@ void AProjectVortexCharacter::AttackCharEvent(bool IsAttacking)
 {
 	AWeaponDefault* MyWeapon = nullptr;
 	MyWeapon = GetCurrentWeapon();
+
 	if (MyWeapon)
 	{
 		MyWeapon->SetWeaponStateFire(IsAttacking);
+
+		if (IsAttacking)
+		{
+			if (UAnimMontage* FireAnim = MyWeapon->WeaponSetting.AnimWeaponInfo.AnimCharFire)
+			{
+				GetMesh()->GetAnimInstance()->Montage_Play(FireAnim);
+				bIsShooting = true;
+			}
+		}
+		else
+		{
+			bIsShooting = false;
+		}
 	}
+}
+
+void AProjectVortexCharacter::TrySwitchNextWeapon()
+{
+
+	if (InventoryComp && InventoryComp->WeaponSlots.Num() > 1)
+	{
+		int8 OldIndex = CurrentIndexWeapon;
+		FAdditionalWeaponInfo OldInfo;
+		if (CurrentWeapon)
+		{
+			OldInfo = CurrentWeapon->WeaponInfo;
+			if (CurrentWeapon->bWeaponReloading)
+				CurrentWeapon->CancelReload();
+		}
+
+		if (InventoryComp->SwitchWeaponToIndex(CurrentIndexWeapon + 1, OldIndex, OldInfo, true))
+		{
+
+		}
+	}
+}
+
+void AProjectVortexCharacter::TrySwitchPrevWeapon()
+{
+	if (InventoryComp && InventoryComp->WeaponSlots.Num() > 1)
+	{
+		int8 OldIndex = CurrentIndexWeapon;
+		FAdditionalWeaponInfo OldInfo;
+		if (CurrentWeapon)
+		{
+			OldInfo = CurrentWeapon->WeaponInfo;
+			if (CurrentWeapon->bWeaponReloading)
+				CurrentWeapon->CancelReload();
+		}
+
+		if (InventoryComp->SwitchWeaponToIndex(CurrentIndexWeapon - 1, OldIndex, OldInfo, false))
+		{
+		}
+	}
+}
+
+void AProjectVortexCharacter::SetCurrentIndexToSwitch(int32 NewIndex)
+{
+	CurrentIndexToSwitch = NewIndex;
 }

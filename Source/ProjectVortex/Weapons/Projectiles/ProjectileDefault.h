@@ -36,7 +36,7 @@ public:
 	FProjectileInfo ProjectileSetting;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bShowDebug = true;
+	bool bShowDebug = false;
 
 
 protected:

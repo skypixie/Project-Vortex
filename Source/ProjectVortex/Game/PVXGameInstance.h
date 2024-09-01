@@ -24,7 +24,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Setting")
 	UDataTable* WeaponInfoTable = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Setting")
+	UDataTable* DropItemInfoTable = nullptr;
+
 	UFUNCTION(BlueprintCallable)
 	bool GetWeaponInfoByName(FName NameWeapon, FWeaponInfo& OutInfo);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetDropItemInfoByName(FName NameItem, FDropItem& OutInfo);
 	
 };

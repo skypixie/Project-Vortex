@@ -8,6 +8,7 @@
 #include "ProjectVortexCharacter.generated.h"
 
 class AWeaponDefault;
+class UInventoryComponent;
 
 UCLASS(Blueprintable)
 class AProjectVortexCharacter : public ACharacter
@@ -36,8 +37,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UInventoryComponent* InventoryComp;
+
 public:
-	/* ----- VARIABLES ----- */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
 
@@ -68,8 +71,15 @@ public:
 	// Weapon
 	AWeaponDefault* CurrentWeapon = nullptr;
 
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	int32 CurrentIndexWeapon = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Demo")
 	FName InitWeaponName;
+
+	// PickUp Logic
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PickUps")
+	int32 CurrentIndexToSwitch;
 
 	// Timer
 	float ShootTime = 0.0f;
@@ -98,7 +108,7 @@ public:
 	void ChangeMovementState(EMovementState NewMovementState);
 
 	UFUNCTION()
-	void InitWeapon(FName IdWeapon);
+	void InitWeapon(FName IdWeapon, FAdditionalWeaponInfo WeaponAdditionalInfo, int32 NewCurrentIndexWeapon);
 
 	UFUNCTION(BlueprintCallable)
 	void TryReloadWeapon();
@@ -107,13 +117,21 @@ public:
 	void WeaponReloadStart(UAnimMontage* Anim);
 
 	UFUNCTION()
-	void WeaponReloadEnd();
+	void WeaponReloadEnd(bool bIsSuccess, int32 AmmoTake);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void WeaponReloadStart_BP(UAnimMontage* Anim);
+	void WeaponReloadStart_BP_Implementation(UAnimMontage* Anim);
 
 	UFUNCTION(BlueprintNativeEvent)
-	void WeaponReloadEnd_BP();
+	void WeaponReloadEnd_BP(bool bIsSuccess);
+	void WeaponReloadEnd_BP_Implementation(bool bIsSuccess);
+
+	UFUNCTION()
+	void WeaponFireStart(UAnimMontage* Anim);
+	UFUNCTION(BlueprintNativeEvent)
+	void WeaponFireStart_BP(UAnimMontage* Anim);
+	void WeaponFireStart_BP_Implementation(UAnimMontage* Anim);
 
 	UFUNCTION(BlueprintCallable)
 	AWeaponDefault* GetCurrentWeapon();
@@ -121,5 +139,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCharEvent(bool IsAttacking);
+
+	UFUNCTION(BlueprintCallable)
+	void TrySwitchNextWeapon();
+
+
+	UFUNCTION(BlueprintCallable)
+	void TrySwitchPrevWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentIndexToSwitch(int32 NewIndex);
 };
 

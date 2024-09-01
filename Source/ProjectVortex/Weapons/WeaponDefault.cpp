@@ -9,6 +9,7 @@
 #include "Engine/StaticMeshActor.h"
 
 #include "Weapons/Projectiles/ProjectileDefault.h"
+#include "Character/InventoryComponent.h"
 
 // Sets default values
 AWeaponDefault::AWeaponDefault()
@@ -86,28 +87,14 @@ bool AWeaponDefault::CheckWeaponCanFire()
 
 void AWeaponDefault::FireTick(float DeltaTime)
 {
-	if (GetWeaponRound() > 0)
+	if (bWeaponFiring && GetWeaponRound() > 0 && !bWeaponReloading)
 	{
-		if (bWeaponFiring)
+		if (FireTimer < 0.f)
 		{
-			if (FireTimer < 0.f)
-			{
-				if (!bWeaponReloading)
-				{
-					Fire();
-				}
-			}
-			else {
-				FireTimer -= DeltaTime;
-			}
+			Fire();
 		}
-	}
-	else
-	{
-		if (!bWeaponReloading)
-		{
-			InitReload();
-		}
+		else
+			FireTimer -= DeltaTime;
 	}
 }
 
@@ -196,9 +183,43 @@ void AWeaponDefault::ClipDropTick(float DeltaTime)
 
 void AWeaponDefault::Fire()
 {
+	UAnimMontage* AnimToPlay = nullptr;
+	if (bWeaponAiming)
+		AnimToPlay = WeaponSetting.AnimWeaponInfo.AnimCharFireAim;
+	else
+		AnimToPlay = WeaponSetting.AnimWeaponInfo.AnimCharFire;
+
+	if (WeaponSetting.AnimWeaponInfo.AnimWeaponFire
+		&& SkeletalMeshWeapon
+		&& SkeletalMeshWeapon->GetAnimInstance())
+	{
+		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSetting.AnimWeaponInfo.AnimWeaponFire);
+	}
+
+	if (WeaponSetting.ShellBullets.DropMesh)
+	{
+		if (WeaponSetting.ShellBullets.DropMeshTime < 0.0f)
+		{
+			InitDropMesh(WeaponSetting.ShellBullets.DropMesh,
+				WeaponSetting.ShellBullets.DropMeshOffset,
+				WeaponSetting.ShellBullets.DropMeshImpulseDir,
+				WeaponSetting.ShellBullets.DropMeshLifeTime,
+				WeaponSetting.ShellBullets.ImpulseRandomDispersion,
+				WeaponSetting.ShellBullets.PowerImpulse,
+				WeaponSetting.ShellBullets.CustomMass);
+		}
+		else
+		{
+			bDropShellFlag = true;
+			DropShellTimer = WeaponSetting.ShellBullets.DropMeshTime;
+		}
+	}
+
 	FireTimer = WeaponSetting.RateOfFire;
 	WeaponInfo.Round -= 1;
 	ChangeDispersionByShot();
+
+	OnWeaponFireStart.Broadcast(AnimToPlay);
 
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponSetting.SoundFireWeapon, ShootLocation->GetComponentLocation());
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSetting.EffectFireWeapon, ShootLocation->GetComponentTransform());
@@ -294,6 +315,12 @@ void AWeaponDefault::Fire()
 			bDropShellFlag = true;
 		}
 	}
+
+	if (GetWeaponRound() <= 0 && !bWeaponReloading)
+	{
+		if (CheckCanWeaponReload())
+			InitReload();
+	}
 }
 
 FProjectileInfo AWeaponDefault::GetProjectile()
@@ -322,7 +349,9 @@ void AWeaponDefault::InitReload()
 	{
 		UAnimMontage* AnimMontage = WeaponSetting.AnimWeaponInfo.AnimCharReload;
 		if (AnimMontage)
+		{
 			OnWeaponReloadStart.Broadcast(AnimMontage);
+		}
 	}
 
 	if (WeaponSetting.ClipDropMesh.DropMesh)
@@ -335,9 +364,62 @@ void AWeaponDefault::InitReload()
 void AWeaponDefault::FinishReload()
 {
 	bWeaponReloading = false;
-	WeaponInfo.Round = WeaponSetting.MaxRound;
 
-	OnWeaponReloadEnd.Broadcast();
+	int8 AvailableAmmoFromInventory = GetAvailableAmmoForReload();
+	int8 AmmoToTake;
+	int8 NeedToReload = WeaponSetting.MaxRound - WeaponInfo.Round;
+
+	if (NeedToReload > AvailableAmmoFromInventory)
+	{
+		WeaponInfo.Round = AvailableAmmoFromInventory;
+		AmmoToTake = AvailableAmmoFromInventory;
+	}
+	else
+	{
+		WeaponInfo.Round += NeedToReload;
+		AmmoToTake = NeedToReload;
+	}
+
+	OnWeaponReloadEnd.Broadcast(true, -AmmoToTake);
+}
+
+bool AWeaponDefault::CheckCanWeaponReload()
+{
+	bool result = true;
+	if (GetOwner())
+	{
+		UE_LOG(LogTemp, Error, TEXT("AWeaponDefault::CheckCanWeaponReload - OwnerName - %s"), *GetOwner()->GetName());
+
+		UInventoryComponent* MyInv = Cast<UInventoryComponent>(GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
+		if (MyInv)
+		{
+			int8 AvailableAmmoForWeapon;
+			if (!MyInv->CheckAmmoForWeapon(WeaponSetting.WeaponType, AvailableAmmoForWeapon))
+			{
+				result = false;
+			}
+		}
+	}
+	return result;
+}
+
+int8 AWeaponDefault::GetAvailableAmmoForReload()
+{
+	int8 AvailableAmmoForWeapon = WeaponSetting.MaxRound;
+	if (GetOwner())
+	{
+		UE_LOG(LogTemp, Error, TEXT("AWeaponDefault::CheckCanWeaponReload - OwnerName - %s"), *GetOwner()->GetName());
+
+		UInventoryComponent* MyInv = Cast<UInventoryComponent>(GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
+		if (MyInv)
+		{
+			if (MyInv->CheckAmmoForWeapon(WeaponSetting.WeaponType, AvailableAmmoForWeapon))
+			{
+				
+			}
+		}
+	}
+	return AvailableAmmoForWeapon;
 }
 
 void AWeaponDefault::InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDirection, float LifeTimeMesh, float ImpulseRandomDispersion, float PowerImpulse, float CustomMass)
@@ -463,4 +545,14 @@ FVector AWeaponDefault::GetFireEndLocation() const
 int8 AWeaponDefault::GetNumberProjectileByShot() const
 {
 	return WeaponSetting.NumberProjectileByShot;
+}
+
+void AWeaponDefault::CancelReload()
+{
+	bWeaponReloading = false;
+	if (SkeletalMeshWeapon && SkeletalMeshWeapon->GetAnimInstance())
+		SkeletalMeshWeapon->GetAnimInstance()->StopAllMontages(0.15f);
+
+	OnWeaponReloadEnd.Broadcast(false, 0);
+	bDropClipFlag = false;
 }

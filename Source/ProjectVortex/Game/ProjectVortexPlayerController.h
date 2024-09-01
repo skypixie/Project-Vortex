@@ -29,7 +29,7 @@ public:
 	UNiagaraSystem* FXCursor;
 
 	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
 	/** Movement Input Action */
@@ -51,6 +51,24 @@ public:
 	/** Reload Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ReloadAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SwitchWeaponNext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SwitchWeaponPrev;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ActionNum1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ActionNum2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ActionNum3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ActionNum4;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character")
 	AProjectVortexCharacter* PossessedPawn;
@@ -93,5 +111,17 @@ protected:
 	void OnAimCompleted(const FInputActionValue& Value);
 
 	void OnReload(const FInputActionValue& Value);
+
+	void OnSwitchWeaponNext(const FInputActionValue& Value);
+
+	void OnSwitchWeaponPrev(const FInputActionValue& Value);
+
+	void OnActionNum1(const FInputActionValue& Value);
+
+	void OnActionNum2(const FInputActionValue& Value);
+
+	void OnActionNum3(const FInputActionValue& Value);
+
+	void OnActionNum4(const FInputActionValue& Value);
 };
 

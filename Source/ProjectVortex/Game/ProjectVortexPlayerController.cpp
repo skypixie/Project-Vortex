@@ -141,6 +141,54 @@ void AProjectVortexPlayerController::OnReload(const FInputActionValue& Value)
 	}
 }
 
+void AProjectVortexPlayerController::OnSwitchWeaponNext(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->TrySwitchNextWeapon();
+	}
+}
+
+void AProjectVortexPlayerController::OnSwitchWeaponPrev(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->TrySwitchPrevWeapon();
+	}
+}
+
+void AProjectVortexPlayerController::OnActionNum1(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->SetCurrentIndexToSwitch(0);
+	}
+}
+
+void AProjectVortexPlayerController::OnActionNum2(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->SetCurrentIndexToSwitch(1);
+	}
+}
+
+void AProjectVortexPlayerController::OnActionNum3(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->SetCurrentIndexToSwitch(2);
+	}
+}
+
+void AProjectVortexPlayerController::OnActionNum4(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->SetCurrentIndexToSwitch(3);
+	}
+}
+
 void AProjectVortexPlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -161,7 +209,16 @@ void AProjectVortexPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnAim);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AProjectVortexPlayerController::OnAimCompleted);
 
-		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &AProjectVortexPlayerController::OnReload);
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnReload);
+
+		EnhancedInputComponent->BindAction(SwitchWeaponNext, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnSwitchWeaponNext);
+		EnhancedInputComponent->BindAction(SwitchWeaponPrev, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnSwitchWeaponPrev);
+
+		EnhancedInputComponent->BindAction(ActionNum1, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum1);
+		EnhancedInputComponent->BindAction(ActionNum2, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum2);
+		EnhancedInputComponent->BindAction(ActionNum3, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum3);
+		EnhancedInputComponent->BindAction(ActionNum4, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum4);
+
 	}
 	else
 	{

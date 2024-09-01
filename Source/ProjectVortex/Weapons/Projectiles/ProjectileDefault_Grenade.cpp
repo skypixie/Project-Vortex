@@ -75,7 +75,6 @@ void AProjectileDefault_Grenade::Explode()
 	);
 
 	if (bShowDebug) DrawExplosionSphere();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Explode"));
 
 	Destroy();
 }

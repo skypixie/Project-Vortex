@@ -11,7 +11,8 @@
 #include "WeaponDefault.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponReloadStart, UAnimMontage*, Anim);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadEnd);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponReloadEnd, bool, bIsSuccess, int32, AmmoSave);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponFireStart, UAnimMontage*, Anim);
 
 UCLASS()
 class PROJECTVORTEX_API AWeaponDefault : public AActor
@@ -24,6 +25,7 @@ public:
 
 	FOnWeaponReloadStart OnWeaponReloadStart;
 	FOnWeaponReloadEnd OnWeaponReloadEnd;
+	FOnWeaponFireStart OnWeaponFireStart;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 	class USceneComponent* SceneComponent = nullptr;
@@ -135,6 +137,12 @@ public:
 	void FinishReload();
 
 	UFUNCTION()
+	bool CheckCanWeaponReload();
+
+	UFUNCTION()
+	int8 GetAvailableAmmoForReload();
+
+	UFUNCTION()
 	void InitDropMesh(UStaticMesh* DropMesh, FTransform Offset, FVector DropImpulseDirection, float LifeTimeMesh, float ImpulseRandomDispersion, float PowerImpulse, float CustomMass);
 
 	void UpdateStateWeapon(EMovementState NewMovementState);
@@ -143,4 +151,6 @@ public:
 	FVector ApplyDispersionToShoot(FVector DirectionShoot) const;
 	FVector GetFireEndLocation() const;
 	int8 GetNumberProjectileByShot() const;
+
+	void CancelReload();
 };
