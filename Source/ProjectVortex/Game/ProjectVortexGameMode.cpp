@@ -24,3 +24,7 @@ AProjectVortexGameMode::AProjectVortexGameMode()
 	//	PlayerControllerClass = PlayerControllerBPClass.Class;
 	//}
 }
+
+void AProjectVortexGameMode::PlayerCharacterDead()
+{
+}

@@ -535,7 +535,7 @@ bool UInventoryComponent::SwitchWeaponToInventory(FWeaponSlot NewWeapon, int32 I
 		
 		OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("SwitchWeaponToInventory -SUCCESS"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("SwitchWeaponToInventory -SUCCESS"));
 		result = true;
 	}
 	return result;
@@ -565,7 +565,7 @@ bool UInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlot, FDropIte
 	UPVXGameInstance* myGI = Cast<UPVXGameInstance>(GetWorld()->GetGameInstance());
 	if (myGI)
 	{
-		result = myGI->GetDropItemInfoByName(DropItemName, DropItemInfo);
+		result = myGI->GetDropItemInfoByWeaponName(DropItemName, DropItemInfo);
 		if (WeaponSlots.IsValidIndex(IndexSlot))
 		{
 			DropItemInfo.WeaponInfo.AdditionalInfo = WeaponSlots[IndexSlot].AdditionalInfo;

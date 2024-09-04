@@ -12,6 +12,7 @@
 #include "Engine/World.h"
 #include "InputActionValue.h"
 
+#include "ProjectVortexPlayerController.h"
 #include "Weapons/Projectiles/ProjectileDefault.h"
 #include "Weapons/WeaponDefault.h"
 #include "Game/PVXGameInstance.h"
@@ -52,6 +53,12 @@ AProjectVortexCharacter::AProjectVortexCharacter()
 		InventoryComp->OnSwitchWeapon.AddDynamic(this, &AProjectVortexCharacter::InitWeapon);
 	}
 
+	CharHealthComp = CreateDefaultSubobject<UCharacterHealthComponent>(TEXT("HealthComponent"));
+	if (CharHealthComp)
+	{
+		CharHealthComp->OnDead.AddDynamic(this, &AProjectVortexCharacter::CharDead);
+	}
+
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -78,6 +85,8 @@ void AProjectVortexCharacter::Move(FVector2D MovementVector)
 
 void AProjectVortexCharacter::Look(FRotator NewRotation, FVector CursorLocation)
 {
+	if (!bIsAlive) return;
+
 	SetActorRotation(FQuat(NewRotation));
 	if (CurrentWeapon)
 	{
@@ -331,4 +340,47 @@ void AProjectVortexCharacter::TrySwitchPrevWeapon()
 void AProjectVortexCharacter::SetCurrentIndexToSwitch(int32 NewIndex)
 {
 	CurrentIndexToSwitch = NewIndex;
+}
+
+float AProjectVortexCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = (Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser));
+
+	if (bIsAlive)
+	{
+		CharHealthComp->ChangeHealthValue(-DamageAmount);
+	}
+
+	return ActualDamage;
+}
+
+void AProjectVortexCharacter::CharDead()
+{
+	float TimeAnim = 0.0f;
+
+	int32 rnd = FMath::RandHelper(DeadAnims.Num());
+	if (DeadAnims.IsValidIndex(rnd) && IsValid(DeadAnims[rnd]) && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		TimeAnim = DeadAnims[rnd]->GetPlayLength();
+		GetMesh()->GetAnimInstance()->Montage_Play(DeadAnims[rnd]);
+	}
+
+	bIsAlive = false;
+	SetCanBeDamaged(false);
+	UnPossessed();
+
+	// Timer ragdoll
+
+	GetWorldTimerManager().SetTimer(TimerHandle_RagdollTimer, this, &AProjectVortexCharacter::EnableRagdoll, TimeAnim, false);
+
+	
+}
+
+void AProjectVortexCharacter::EnableRagdoll()
+{
+	if (GetMesh())
+	{
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		GetMesh()->SetSimulatePhysics(true);
+	}
 }

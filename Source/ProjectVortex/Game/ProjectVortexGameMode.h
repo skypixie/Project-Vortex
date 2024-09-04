@@ -13,6 +13,8 @@ class AProjectVortexGameMode : public AGameModeBase
 
 public:
 	AProjectVortexGameMode();
+
+	void PlayerCharacterDead();
 };
 
 

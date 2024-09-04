@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "FuncLibrary/UserTypes.h"
+#include "CharacterHealthComponent.h"
+
 #include "ProjectVortexCharacter.generated.h"
 
 class AWeaponDefault;
@@ -40,7 +43,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent* InventoryComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCharacterHealthComponent* CharHealthComp;
+
 public:
+
+	FTimerHandle TimerHandle_RagdollTimer;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	EMovementState MovementState = EMovementState::Run_State;
 
@@ -52,6 +61,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bIsAiming;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bIsAlive = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	TArray<UAnimMontage*> DeadAnims;
 
 	// Stamina for sprinting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -149,5 +164,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentIndexToSwitch(int32 NewIndex);
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintCallable)
+	void CharDead();
+
+	void EnableRagdoll();
 };
 

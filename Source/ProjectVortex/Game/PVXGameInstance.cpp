@@ -25,23 +25,23 @@ bool UPVXGameInstance::GetWeaponInfoByName(FName NameWeapon, FWeaponInfo& OutInf
 	return bIsFound;
 }
 
-bool UPVXGameInstance::GetDropItemInfoByName(FName NameItem, FDropItem& OutInfo)
+bool UPVXGameInstance::GetDropItemInfoByWeaponName(FName NameItem, FDropItem& OutInfo)
 {
-	bool bIsFound = false;
+	bool bIsFind = false;
 
 	if (DropItemInfoTable)
 	{
 		FDropItem* DropItemInfoRow;
 		TArray<FName> RowNames = DropItemInfoTable->GetRowNames();
-		
+
 		int8 i = 0;
-		while (i < RowNames.Num() && !bIsFound)
+		while (i < RowNames.Num() && !bIsFind)
 		{
 			DropItemInfoRow = DropItemInfoTable->FindRow<FDropItem>(RowNames[i], "");
 			if (DropItemInfoRow->WeaponInfo.NameItem == NameItem)
 			{
 				OutInfo = *DropItemInfoRow;
-				bIsFound = true;
+				bIsFind = true;
 			}
 			++i;
 		}
@@ -50,6 +50,5 @@ bool UPVXGameInstance::GetDropItemInfoByName(FName NameItem, FDropItem& OutInfo)
 	{
 		UE_LOG(LogTemp, Error, TEXT("UPVXGameInstance::GetDropItemInfoByName - DropItemInfoTable -NULL"));
 	}
-
-	return bIsFound;
+	return bIsFind;
 }

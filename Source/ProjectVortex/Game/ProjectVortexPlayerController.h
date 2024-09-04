@@ -123,5 +123,9 @@ protected:
 	void OnActionNum3(const FInputActionValue& Value);
 
 	void OnActionNum4(const FInputActionValue& Value);
+
+	void PawnDead();
+
+	virtual void OnUnPossess() override;
 };
 

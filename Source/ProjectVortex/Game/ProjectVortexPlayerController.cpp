@@ -189,6 +189,18 @@ void AProjectVortexPlayerController::OnActionNum4(const FInputActionValue& Value
 	}
 }
 
+void AProjectVortexPlayerController::PawnDead()
+{
+
+}
+
+void AProjectVortexPlayerController::OnUnPossess()
+{
+	Super::OnUnPossess();
+
+	bShowMouseCursor = false;
+}
+
 void AProjectVortexPlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
