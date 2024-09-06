@@ -11,6 +11,7 @@
 #include "Materials/Material.h"
 #include "Engine/World.h"
 #include "InputActionValue.h"
+#include "Engine/DamageEvents.h"
 
 #include "ProjectVortexPlayerController.h"
 #include "Weapons/Projectiles/ProjectileDefault.h"
@@ -342,6 +343,29 @@ void AProjectVortexCharacter::SetCurrentIndexToSwitch(int32 NewIndex)
 	CurrentIndexToSwitch = NewIndex;
 }
 
+EPhysicalSurface AProjectVortexCharacter::GetSurfaceType()
+{
+	EPhysicalSurface Result = EPhysicalSurface::SurfaceType_Default;
+
+	if (CharHealthComp)
+	{
+		if (CharHealthComp->GetCurrentShield() <= 0)
+		{
+			if (GetMesh())
+			{
+				UMaterialInterface* myMaterial = GetMesh()->GetMaterial(0);
+				if (myMaterial)
+				{
+					Result = myMaterial->GetPhysicalMaterial()->SurfaceType;
+				}
+
+			}
+		}
+	}
+
+	return Result;
+}
+
 float AProjectVortexCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = (Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser));
@@ -349,6 +373,16 @@ float AProjectVortexCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 	if (bIsAlive)
 	{
 		CharHealthComp->ChangeHealthValue(-DamageAmount);
+	}
+
+	if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		AProjectileDefault* myProjectile = Cast<AProjectileDefault>(DamageCauser);
+		if (myProjectile)
+		{
+			UUserTypes::AddEffectSurfaceType(this, myProjectile->ProjectileSetting.Effect, GetSurfaceType());
+
+		}
 	}
 
 	return ActualDamage;

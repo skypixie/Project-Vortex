@@ -56,10 +56,13 @@ void AProjectileDefault::InitProjectile(FProjectileInfo InitParam)
 {
 	if (InitParam.StaticMesh)
 		BulletMesh->SetStaticMesh(InitParam.StaticMesh);
-	else BulletMesh->DestroyComponent();
+	else
+		BulletMesh->DestroyComponent();
 
-	if (InitParam.BulletFX) BulletFX->SetTemplate(InitParam.BulletFX);
-	else BulletFX->DestroyComponent();
+	if (InitParam.BulletFX)
+		BulletFX->SetTemplate(InitParam.BulletFX);
+	else
+		BulletFX->DestroyComponent();
 	
 	BulletProjectileMovement->InitialSpeed = InitParam.ProjectileInitSpeed;
 	BulletProjectileMovement->MaxSpeed = InitParam.ProjectileInitSpeed;
@@ -70,6 +73,8 @@ void AProjectileDefault::InitProjectile(FProjectileInfo InitParam)
 
 void AProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	//UE_LOG(LogTemp, Error, TEXT("BulletCollisionSphereHit"));
+
 	if (OtherActor && Hit.PhysMaterial.IsValid())
 	{
 		EPhysicalSurface mySurfaceType = UGameplayStatics::GetSurfaceType(Hit);
@@ -95,7 +100,10 @@ void AProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitComp, 
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ProjectileSetting.HitSound, Hit.ImpactPoint);
 		}
+		
+		UUserTypes::AddEffectSurfaceType(Hit.GetActor(), ProjectileSetting.Effect, mySurfaceType);
 	}
+
 
 	UGameplayStatics::ApplyDamage(OtherActor, ProjectileSetting.ProjectileDamage, GetInstigatorController(), this, NULL);
 	ImpactProjectile();

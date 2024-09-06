@@ -52,6 +52,8 @@ void AProjectileDefault_Grenade::InitProjectile(FProjectileInfo InitParam)
 
 void AProjectileDefault_Grenade::Explode()
 {
+	//UE_LOG(LogTemp, Error, TEXT("EXPLODE"));
+
 	TimerEnabled = false;
 	if (ProjectileSetting.ExploseFX)
 	{
@@ -71,7 +73,7 @@ void AProjectileDefault_Grenade::Explode()
 		ProjectileSetting.MinRadiusDamage,
 		ProjectileSetting.MaxRadiusDamage,
 		ProjectileSetting.DamageFalloff,
-		NULL, IgnoredActor, nullptr, nullptr
+		UDamageType::StaticClass(), IgnoredActor, this, nullptr
 	);
 
 	if (bShowDebug) DrawExplosionSphere();

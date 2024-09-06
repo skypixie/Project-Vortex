@@ -5,6 +5,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine/DataTable.h"
 
+#include "StateEffects/StateEffect.h"
+
 #include "UserTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -75,6 +77,9 @@ struct FProjectileInfo
 	/* Fx on hit check by surface */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSetting")
 	TMap<TEnumAsByte<EPhysicalSurface>, UParticleSystem*> HitFxs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+	TSubclassOf<UStateEffect> Effect = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSetting")
 	UParticleSystem* ExploseFX = nullptr;
@@ -313,4 +318,9 @@ UCLASS()
 class PROJECTVORTEX_API UUserTypes : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	static void AddEffectSurfaceType(AActor* HitActor, TSubclassOf<UStateEffect> AddEffectClass, EPhysicalSurface SurfaceType);
 };

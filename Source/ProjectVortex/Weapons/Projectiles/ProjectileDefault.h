@@ -33,6 +33,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UParticleSystemComponent* BulletFX = nullptr;
 
+	UPROPERTY(BlueprintReadOnly)
 	FProjectileInfo ProjectileSetting;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")

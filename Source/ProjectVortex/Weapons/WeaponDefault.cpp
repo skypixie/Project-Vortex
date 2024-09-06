@@ -10,6 +10,7 @@
 
 #include "Weapons/Projectiles/ProjectileDefault.h"
 #include "Character/InventoryComponent.h"
+#include "StateEffects/StateEffect.h"
 
 // Sets default values
 AWeaponDefault::AWeaponDefault()
@@ -247,7 +248,7 @@ void AWeaponDefault::Fire()
 			if (ProjectileInfo.Projectile)
 			{
 				/* Ballistic fire */
-				// if (ProjectileInfo.bIsLikeBomb)
+				if (ProjectileInfo.bIsLikeBomb)
 				{
 
 					FActorSpawnParameters SpawnParams;
@@ -263,11 +264,11 @@ void AWeaponDefault::Fire()
 					}
 				}
 				/* Hit - Scan fire */
-				// i dont need it NOW
-				/*else
+				else
 				{
 					TArray<AActor*> IgnoredActor;
 					FHitResult Hit;
+					
 
 					UKismetSystemLibrary::LineTraceSingle(GetWorld(),
 						SpawnLocation,
@@ -307,9 +308,15 @@ void AWeaponDefault::Fire()
 						{
 							UGameplayStatics::PlaySoundAtLocation(GetWorld(), WeaponSetting.ProjectileSetting.HitSound, Hit.ImpactPoint);
 						}
-						UGameplayStatics::ApplyDamage(Hit.GetActor(), WeaponSetting.ProjectileSetting.ProjectileDamage, GetInstigatorController(), this, NULL);
+						//UGameplayStatics::ApplyDamage(Hit.GetActor(), WeaponSetting.ProjectileSetting.ProjectileDamage, GetInstigatorController(), this, NULL);
+						
+						UUserTypes::AddEffectSurfaceType(Hit.GetActor(), ProjectileInfo.Effect, mySurfaceType);
+
+						UGameplayStatics::ApplyPointDamage(Hit.GetActor(), WeaponSetting.ProjectileSetting.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);
+
+
 					}
-				}*/
+				}
 			}
 
 			bDropShellFlag = true;

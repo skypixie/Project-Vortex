@@ -7,6 +7,7 @@
 
 #include "FuncLibrary/UserTypes.h"
 #include "CharacterHealthComponent.h"
+#include "Interface/UGameActor.h"
 
 #include "ProjectVortexCharacter.generated.h"
 
@@ -14,7 +15,7 @@ class AWeaponDefault;
 class UInventoryComponent;
 
 UCLASS(Blueprintable)
-class AProjectVortexCharacter : public ACharacter
+class AProjectVortexCharacter : public ACharacter, public IUGameActor
 {
 	GENERATED_BODY()
 
@@ -164,6 +165,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCurrentIndexToSwitch(int32 NewIndex);
+
+	// ===== INTERFACE =====
+
+	virtual EPhysicalSurface GetSurfaceType() override;
+
+	// =====================
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
