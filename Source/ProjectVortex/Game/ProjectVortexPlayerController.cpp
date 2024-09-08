@@ -189,6 +189,14 @@ void AProjectVortexPlayerController::OnActionNum4(const FInputActionValue& Value
 	}
 }
 
+void AProjectVortexPlayerController::OnAbilityAction(const FInputActionValue& Value)
+{
+	if (IsValid(PossessedPawn))
+	{
+		PossessedPawn->TryAbilityEnabled();
+	}
+}
+
 void AProjectVortexPlayerController::PawnDead()
 {
 
@@ -230,6 +238,8 @@ void AProjectVortexPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(ActionNum2, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum2);
 		EnhancedInputComponent->BindAction(ActionNum3, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum3);
 		EnhancedInputComponent->BindAction(ActionNum4, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnActionNum4);
+
+		EnhancedInputComponent->BindAction(AbilityAction, ETriggerEvent::Started, this, &AProjectVortexPlayerController::OnAbilityAction);
 
 	}
 	else

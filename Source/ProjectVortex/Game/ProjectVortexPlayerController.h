@@ -70,6 +70,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ActionNum4;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AbilityAction;
+
 	UPROPERTY(BlueprintReadWrite, Category = "Character")
 	AProjectVortexCharacter* PossessedPawn;
 
@@ -123,6 +126,8 @@ protected:
 	void OnActionNum3(const FInputActionValue& Value);
 
 	void OnActionNum4(const FInputActionValue& Value);
+
+	void OnAbilityAction(const FInputActionValue& Value);
 
 	void PawnDead();
 

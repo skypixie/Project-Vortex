@@ -17,13 +17,16 @@ class PROJECTVORTEX_API UStateEffect : public UObject
 public:
 
 	virtual bool InitObject(AActor* Actor);
-	virtual void ExecuteEffect(float DeltaTime);
 	virtual void DestroyObject();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
 	TArray<TEnumAsByte<EPhysicalSurface>> PossibleInteractSurface;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	bool bIsStackable = false;
+
 	AActor* myActor = nullptr;
+
 };
 
 
@@ -40,7 +43,7 @@ public:
 	virtual void ExecuteOnce();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting Execute Once")
-	float Power = 20.0f;
+	float Power = 0.0f;
 };
 
 
@@ -67,6 +70,43 @@ public:
 	UParticleSystem* ParticleEffect = nullptr;
 
 	UParticleSystemComponent* ParticleEmitter = nullptr;
+
+public:
+
+	virtual bool InitObject(AActor* Actor) override;
+	virtual void DestroyObject() override;
+
+	virtual void Execute();
+};
+
+
+/*
+NEED HELP WITH THIS ONE
+*/
+UCLASS()
+class PROJECTVORTEX_API UStateEffect_Stun : public UStateEffect_ExecuteTimer
+{
+	GENERATED_BODY()
+
+public:
+
+	AController* TargetController;
+
+public:
+
+	virtual bool InitObject(AActor* Actor) override;
+	virtual void DestroyObject() override;
+
+	virtual void Execute();
+};
+
+
+UCLASS()
+class PROJECTVORTEX_API UStateEffect_Immortality : public UStateEffect_ExecuteTimer
+{
+	GENERATED_BODY()
+
+public:
 
 public:
 

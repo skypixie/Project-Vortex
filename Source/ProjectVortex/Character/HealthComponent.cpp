@@ -46,6 +46,7 @@ void UHealthComponent::ChangeHealthValue(float ChangeValue)
 {
 	ChangeValue = ChangeValue * CoefDamage;
 	Health += ChangeValue;
+	OnHealthChange.Broadcast(Health, ChangeValue);
 
 	if (Health > 100.0f)
 	{
@@ -58,6 +59,4 @@ void UHealthComponent::ChangeHealthValue(float ChangeValue)
 			OnDead.Broadcast();
 		}
 	}
-
-	OnHealthChange.Broadcast(Health, ChangeValue);
 }

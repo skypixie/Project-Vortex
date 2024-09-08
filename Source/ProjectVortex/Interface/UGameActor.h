@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "UGameActor.generated.h"
 
+class UStateEffect;
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UUGameActor : public UInterface
@@ -23,5 +25,13 @@ class PROJECTVORTEX_API IUGameActor
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
+	TArray<UStateEffect*> Effects;
+
 	virtual EPhysicalSurface GetSurfaceType();
+
+	virtual TArray<UStateEffect*> GetAllCurrentEffects();
+
+	virtual void RemoveEffect(UStateEffect* Effect);
+
+	virtual void AddEffect(UStateEffect* NewEffect);
 };

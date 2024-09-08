@@ -298,6 +298,18 @@ void AProjectVortexCharacter::AttackCharEvent(bool IsAttacking)
 	}
 }
 
+void AProjectVortexCharacter::TryAbilityEnabled()
+{
+	if (AbilityEffect) // TODO: Cooldown
+	{
+		UStateEffect* NewEffect = NewObject<UStateEffect>(this, AbilityEffect);
+		if (NewEffect)
+		{
+			NewEffect->InitObject(this);
+		}
+	}
+}
+
 void AProjectVortexCharacter::TrySwitchNextWeapon()
 {
 
@@ -366,22 +378,42 @@ EPhysicalSurface AProjectVortexCharacter::GetSurfaceType()
 	return Result;
 }
 
+TArray<UStateEffect*> AProjectVortexCharacter::GetAllCurrentEffects()
+{
+	return Effects;
+}
+
+void AProjectVortexCharacter::RemoveEffect(UStateEffect* Effect)
+{
+	Effects.Remove(Effect);
+}
+
+void AProjectVortexCharacter::AddEffect(UStateEffect* NewEffect)
+{
+	Effects.Add(NewEffect);
+}
+
 float AProjectVortexCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float ActualDamage = (Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser));
+	float ActualDamage = 0.0f;
 
-	if (bIsAlive)
+	if (CanBeDamaged())
 	{
-		CharHealthComp->ChangeHealthValue(-DamageAmount);
-	}
+		ActualDamage = (Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser));
 
-	if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
-	{
-		AProjectileDefault* myProjectile = Cast<AProjectileDefault>(DamageCauser);
-		if (myProjectile)
+		if (bIsAlive)
 		{
-			UUserTypes::AddEffectSurfaceType(this, myProjectile->ProjectileSetting.Effect, GetSurfaceType());
+			CharHealthComp->ChangeHealthValue(-DamageAmount);
+		}
 
+		if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+		{
+			AProjectileDefault* myProjectile = Cast<AProjectileDefault>(DamageCauser);
+			if (myProjectile)
+			{
+				UUserTypes::AddEffectSurfaceType(this, myProjectile->ProjectileSetting.Effect, GetSurfaceType());
+
+			}
 		}
 	}
 

@@ -69,6 +69,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	TArray<UAnimMontage*> DeadAnims;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
+	TSubclassOf<UStateEffect> AbilityEffect;
+
 	// Stamina for sprinting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintStamina = 100.0f;
@@ -99,6 +102,10 @@ public:
 
 	// Timer
 	float ShootTime = 0.0f;
+
+	TArray<UStateEffect*> Effects;
+
+public:
 
 	/* ----- FUNCTIONS ----- */
 
@@ -157,6 +164,9 @@ public:
 	void AttackCharEvent(bool IsAttacking);
 
 	UFUNCTION(BlueprintCallable)
+	void TryAbilityEnabled();
+
+	UFUNCTION(BlueprintCallable)
 	void TrySwitchNextWeapon();
 
 
@@ -169,6 +179,12 @@ public:
 	// ===== INTERFACE =====
 
 	virtual EPhysicalSurface GetSurfaceType() override;
+
+	TArray<UStateEffect*> GetAllCurrentEffects() override;
+
+	void RemoveEffect(UStateEffect* Effect) override;
+
+	void AddEffect(UStateEffect* NewEffect) override;
 
 	// =====================
 

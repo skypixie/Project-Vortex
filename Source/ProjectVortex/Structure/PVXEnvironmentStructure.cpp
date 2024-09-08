@@ -3,6 +3,9 @@
 
 #include "Structure/PVXEnvironmentStructure.h"
 
+#include "Materials/MaterialInterface.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+
 // Sets default values
 APVXEnvironmentStructure::APVXEnvironmentStructure()
 {
@@ -38,5 +41,19 @@ EPhysicalSurface APVXEnvironmentStructure::GetSurfaceType()
 		}
 	}
 	return Result;
+}
 
+TArray<UStateEffect*> APVXEnvironmentStructure::GetAllCurrentEffects()
+{
+	return Effects;
+}
+
+void APVXEnvironmentStructure::RemoveEffect(UStateEffect* Effect)
+{
+	Effects.Remove(Effect);
+}
+
+void APVXEnvironmentStructure::AddEffect(UStateEffect* NewEffect)
+{
+	Effects.Add(NewEffect);
 }
