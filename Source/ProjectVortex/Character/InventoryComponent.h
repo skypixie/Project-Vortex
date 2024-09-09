@@ -89,4 +89,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interface")
 	bool GetDropItemInfoFromInventory(int32 IndexSlot, FDropItem& DropItemInfo);
 
+	UFUNCTION(BlueprintCallable, Category = "Interface")
+	void DropWeaponByIndex(int32 ByIndex, FDropItem& DropItemInfo);
+
 };

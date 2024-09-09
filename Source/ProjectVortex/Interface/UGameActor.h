@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
+#include "FuncLibrary/UserTypes.h"
+
 #include "UGameActor.generated.h"
 
 class UStateEffect;
@@ -34,4 +37,13 @@ public:
 	virtual void RemoveEffect(UStateEffect* Effect);
 
 	virtual void AddEffect(UStateEffect* NewEffect);
+
+	// inventory
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void DropWeaponToWorld(FDropItem DropItemInfo);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void DropAmmoToWorld(EWeaponType TypeAmmo, int32 Cout);
+
+	// Flags
+	bool bIsStunned = false;
 };

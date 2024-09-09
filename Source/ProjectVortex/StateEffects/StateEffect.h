@@ -80,19 +80,17 @@ public:
 };
 
 
-/*
-NEED HELP WITH THIS ONE
-*/
 UCLASS()
-class PROJECTVORTEX_API UStateEffect_Stun : public UStateEffect_ExecuteTimer
+class PROJECTVORTEX_API UStateEffect_Stun : public UStateEffect
 {
 	GENERATED_BODY()
 
 public:
 
-	AController* TargetController;
+	FTimerHandle TimerHandle_DestroyTimer;
 
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting Execute Timer")
+	float Timer = 5.0f;
 
 	virtual bool InitObject(AActor* Actor) override;
 	virtual void DestroyObject() override;
@@ -105,8 +103,6 @@ UCLASS()
 class PROJECTVORTEX_API UStateEffect_Immortality : public UStateEffect_ExecuteTimer
 {
 	GENERATED_BODY()
-
-public:
 
 public:
 

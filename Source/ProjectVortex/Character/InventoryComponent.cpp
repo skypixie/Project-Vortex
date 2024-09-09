@@ -3,6 +3,7 @@
 
 #include "Character/InventoryComponent.h"
 #include "Game/PVXGameInstance.h"
+#include "Interface/UGameActor.h"
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -573,5 +574,45 @@ bool UInventoryComponent::GetDropItemInfoFromInventory(int32 IndexSlot, FDropIte
 	}
 
 	return result;
+}
+
+void UInventoryComponent::DropWeaponByIndex(int32 ByIndex, FDropItem& DropItemInfo)
+{
+	FWeaponSlot EmptyWeaponSlot;
+
+	bool bCanDrop = false;
+	int8 i = 0;
+	int8 AvailableWeaponNum = 0;
+	while (i < WeaponSlots.Num() && !bCanDrop)
+	{
+		if (!WeaponSlots[i].NameItem.IsNone())
+		{
+			++AvailableWeaponNum;
+			if (AvailableWeaponNum > 1) bCanDrop = true;
+		}
+		++i;
+	}
+
+	if (bCanDrop && WeaponSlots.IsValidIndex(ByIndex) && GetDropItemInfoFromInventory(ByIndex, DropItemInfo))
+	{
+		bool bIsFindWeapon = false;
+		int8 j = 0;
+		while (j < WeaponSlots.Num() && !bIsFindWeapon)
+		{
+			if (!WeaponSlots[j].NameItem.IsNone())
+			{
+				OnSwitchWeapon.Broadcast(WeaponSlots[j].NameItem, WeaponSlots[j].AdditionalInfo, j);
+			}
+			++j;
+		}
+
+		WeaponSlots[ByIndex] = EmptyWeaponSlot;
+		if (GetOwner()->GetClass()->ImplementsInterface(UUGameActor::StaticClass()))
+		{
+			IUGameActor::Execute_DropWeaponToWorld(GetOwner(), DropItemInfo);
+		}
+
+		OnUpdateWeaponSlots.Broadcast(ByIndex, EmptyWeaponSlot);
+	}
 }
 

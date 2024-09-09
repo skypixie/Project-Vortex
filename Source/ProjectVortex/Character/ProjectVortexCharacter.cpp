@@ -79,14 +79,14 @@ void AProjectVortexCharacter::BeginPlay()
 
 void AProjectVortexCharacter::Move(FVector2D MovementVector)
 {
-	if (bIsSprintnig) return;
+	if (bIsSprintnig || bIsStunned) return;
 	ChangeMovementState(EMovementState::Run_State);
 	AddMovementInput(FVector(MovementVector.X, MovementVector.Y, 0.0f));
 }
 
 void AProjectVortexCharacter::Look(FRotator NewRotation, FVector CursorLocation)
 {
-	if (!bIsAlive) return;
+	if (!bIsAlive || bIsStunned) return;
 
 	SetActorRotation(FQuat(NewRotation));
 	if (CurrentWeapon)
@@ -113,12 +113,14 @@ void AProjectVortexCharacter::Look(FRotator NewRotation, FVector CursorLocation)
 
 void AProjectVortexCharacter::Sprint()
 {
+	if (bIsStunned) return;
 	ChangeMovementState(EMovementState::Sprint_State);
 	AddMovementInput(GetActorForwardVector());
 }
 
 void AProjectVortexCharacter::Aim()
 {
+	if (bIsStunned) return;
 	ChangeMovementState(EMovementState::Aim_State);
 	bIsAiming = true;
 }
@@ -131,6 +133,8 @@ void AProjectVortexCharacter::AimCompleted()
 
 void AProjectVortexCharacter::CharacterUpdate()
 {
+	if (bIsStunned) return;
+
 	float ResultSpeed = 600.0f;
 	switch (MovementState)
 	{
@@ -265,6 +269,7 @@ void AProjectVortexCharacter::WeaponFireStart(UAnimMontage* Anim)
 
 void AProjectVortexCharacter::TryReloadWeapon()
 {
+	if (bIsStunned) return;
 	if (CurrentWeapon && ! CurrentWeapon->bWeaponReloading)
 	{
 		if (CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSetting.MaxRound && CurrentWeapon->CheckCanWeaponReload())
@@ -276,6 +281,7 @@ void AProjectVortexCharacter::TryReloadWeapon()
 
 void AProjectVortexCharacter::AttackCharEvent(bool IsAttacking)
 {
+	if (bIsStunned) return;
 	AWeaponDefault* MyWeapon = nullptr;
 	MyWeapon = GetCurrentWeapon();
 
@@ -312,6 +318,7 @@ void AProjectVortexCharacter::TryAbilityEnabled()
 
 void AProjectVortexCharacter::TrySwitchNextWeapon()
 {
+	if (bIsStunned) return;
 
 	if (InventoryComp && InventoryComp->WeaponSlots.Num() > 1)
 	{
@@ -333,6 +340,8 @@ void AProjectVortexCharacter::TrySwitchNextWeapon()
 
 void AProjectVortexCharacter::TrySwitchPrevWeapon()
 {
+	if (bIsStunned) return;
+
 	if (InventoryComp && InventoryComp->WeaponSlots.Num() > 1)
 	{
 		int8 OldIndex = CurrentIndexWeapon;
