@@ -184,12 +184,14 @@ void AWeaponDefault::ClipDropTick(float DeltaTime)
 
 void AWeaponDefault::Fire()
 {
+	// Character anim for weapon
 	UAnimMontage* AnimToPlay = nullptr;
 	if (bWeaponAiming)
 		AnimToPlay = WeaponSetting.AnimWeaponInfo.AnimCharFireAim;
 	else
 		AnimToPlay = WeaponSetting.AnimWeaponInfo.AnimCharFire;
 
+	// Weapon fire anim
 	if (WeaponSetting.AnimWeaponInfo.AnimWeaponFire
 		&& SkeletalMeshWeapon
 		&& SkeletalMeshWeapon->GetAnimInstance())
@@ -197,6 +199,7 @@ void AWeaponDefault::Fire()
 		SkeletalMeshWeapon->GetAnimInstance()->Montage_Play(WeaponSetting.AnimWeaponInfo.AnimWeaponFire);
 	}
 
+	// Drop bullet shells
 	if (WeaponSetting.ShellBullets.DropMesh)
 	{
 		if (WeaponSetting.ShellBullets.DropMeshTime < 0.0f)
@@ -215,7 +218,7 @@ void AWeaponDefault::Fire()
 			DropShellTimer = WeaponSetting.ShellBullets.DropMeshTime;
 		}
 	}
-
+	
 	FireTimer = WeaponSetting.RateOfFire;
 	WeaponInfo.Round -= 1;
 	ChangeDispersionByShot();
@@ -273,7 +276,7 @@ void AWeaponDefault::Fire()
 					UKismetSystemLibrary::LineTraceSingle(GetWorld(),
 						SpawnLocation,
 						EndLocation,
-						ETraceTypeQuery::TraceTypeQuery1,
+						ETraceTypeQuery::TraceTypeQuery2,
 						false,
 						IgnoredActor,
 						EDrawDebugTrace::ForDuration,
@@ -281,7 +284,7 @@ void AWeaponDefault::Fire()
 						true,
 						FLinearColor::Red,
 						FLinearColor::Red,
-						1.f);
+						10.f);
 
 					if (Hit.GetActor() && Hit.PhysMaterial.IsValid())
 					{
@@ -519,7 +522,7 @@ float AWeaponDefault::GetCurrentDispersion() const
 	return CurrentDispersion;
 }
 
-FVector AWeaponDefault::ApplyDispersionToShoot(FVector DirectionShoot) const
+FVector AWeaponDefault::ApplyDispersionToShoot(const FVector& DirectionShoot) const
 {
 	return FMath::VRandCone(DirectionShoot, GetCurrentDispersion() * PI / 180.f);
 }

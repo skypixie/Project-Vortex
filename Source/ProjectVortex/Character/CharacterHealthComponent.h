@@ -53,5 +53,8 @@ public:
 	void CooldownShieldEnd();
 
 	void RecoveryShield();
+
+	UFUNCTION(BlueprintCallable)
+	float GetShieldValue();
 	
 };

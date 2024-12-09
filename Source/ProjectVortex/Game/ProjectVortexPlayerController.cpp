@@ -202,13 +202,6 @@ void AProjectVortexPlayerController::PawnDead()
 
 }
 
-void AProjectVortexPlayerController::OnUnPossess()
-{
-	Super::OnUnPossess();
-
-	bShowMouseCursor = false;
-}
-
 void AProjectVortexPlayerController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -251,7 +244,7 @@ void AProjectVortexPlayerController::SetupInputComponent()
 void AProjectVortexPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	if (!IsValid(PossessedPawn))
+	if (IsValid(InPawn))
 	{
 		PossessedPawn = Cast<AProjectVortexCharacter>(InPawn);
 	}
@@ -275,4 +268,10 @@ void AProjectVortexPlayerController::Tick(float DeltaTime)
 		}
 		PossessedPawn->Look(CharacterToCursorRotation, CursorLocation);
 	}
+}
+
+void AProjectVortexPlayerController::OnUnPossess()
+{
+	Super::OnUnPossess();
+	
 }

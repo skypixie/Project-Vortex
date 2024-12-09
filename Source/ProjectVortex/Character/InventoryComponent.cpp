@@ -21,33 +21,6 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Find init WeaponSlots and first Init Weapon
-	for (int8 i = 0; i < WeaponSlots.Num(); ++i)
-	{
-		UPVXGameInstance* myGI = Cast<UPVXGameInstance>(GetWorld()->GetGameInstance());
-		if (myGI)
-		{
-			if (!WeaponSlots[i].NameItem.IsNone())
-			{
-				FWeaponInfo Info;
-				if (myGI->GetWeaponInfoByName(WeaponSlots[i].NameItem, Info))
-					WeaponSlots[i].AdditionalInfo.Round = Info.MaxRound;
-				else
-				{
-					/*WeaponSlots.RemoveAt(i);
-					--i;*/
-				}
-			}
-		}
-	}
-
-	MaxSlotsWeapon = WeaponSlots.Num();
-
-	if (WeaponSlots.IsValidIndex(0))
-	{
-		if (!WeaponSlots[0].NameItem.IsNone())
-			OnSwitchWeapon.Broadcast(WeaponSlots[0].NameItem, WeaponSlots[0].AdditionalInfo, 0);
-	}
 	
 }
 
@@ -60,6 +33,7 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
+// TODO: refactoring !!!!!
 bool UInventoryComponent::SwitchWeaponToIndex(int32 ChangeToIndex, int32 OldIndex, FAdditionalWeaponInfo OldInfo, bool bIsForward)
 {
 	bool bIsSuccess = false;
@@ -550,6 +524,7 @@ bool UInventoryComponent::TryGetWeaponToInventory(FWeaponSlot NewWeapon)
 		if (WeaponSlots.IsValidIndex(IndexSlot))
 		{
 			WeaponSlots[IndexSlot] = NewWeapon;
+
 			OnUpdateWeaponSlots.Broadcast(IndexSlot, NewWeapon);
 			return true;
 		}
@@ -613,6 +588,47 @@ void UInventoryComponent::DropWeaponByIndex(int32 ByIndex, FDropItem& DropItemIn
 		}
 
 		OnUpdateWeaponSlots.Broadcast(ByIndex, EmptyWeaponSlot);
+	}
+}
+
+TArray<FWeaponSlot> UInventoryComponent::GetWeaponSlots()
+{
+	return WeaponSlots;
+}
+
+TArray<FAmmoSlot> UInventoryComponent::GetAmmoSlots()
+{
+	return AmmoSlots;
+}
+
+void UInventoryComponent::InitInventory(TArray<FWeaponSlot> NewWeaponSlotsInfo, TArray<FAmmoSlot> NewAmmoSlotsInfo)
+{
+	WeaponSlots = NewWeaponSlotsInfo;
+	AmmoSlots = NewAmmoSlotsInfo;
+
+	// Find init WeaponSlots and first Init Weapon
+	for (int8 i = 0; i < WeaponSlots.Num(); ++i)
+	{
+		UPVXGameInstance* myGI = Cast<UPVXGameInstance>(GetWorld()->GetGameInstance());
+		if (myGI)
+		{
+			if (!WeaponSlots[i].NameItem.IsNone())
+			{
+				FWeaponInfo Info;
+				if (myGI->GetWeaponInfoByName(WeaponSlots[i].NameItem, Info))
+				{
+					WeaponSlots[i].AdditionalInfo.Round = Info.MaxRound;
+				}
+			}
+		}
+	}
+
+	MaxSlotsWeapon = WeaponSlots.Num();
+
+	if (WeaponSlots.IsValidIndex(0))
+	{
+		if (!WeaponSlots[0].NameItem.IsNone())
+			OnSwitchWeapon.Broadcast(WeaponSlots[0].NameItem, WeaponSlots[0].AdditionalInfo, 0);
 	}
 }
 

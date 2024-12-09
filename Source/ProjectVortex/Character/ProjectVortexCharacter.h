@@ -88,6 +88,7 @@ public:
 	TSubclassOf<class AProjectileDefault> Projectile = nullptr;
 
 	// Weapon
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 	AWeaponDefault* CurrentWeapon = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
@@ -192,6 +193,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CharDead();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void CharDead_BP();
 
 	void EnableRagdoll();
 };

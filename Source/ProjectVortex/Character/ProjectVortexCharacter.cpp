@@ -94,11 +94,11 @@ void AProjectVortexCharacter::Look(FRotator NewRotation, FVector CursorLocation)
 		FVector Displacement = FVector(0);
 		switch (MovementState) {
 		case EMovementState::Aim_State:
-			Displacement = FVector(0.f, 0.f, 160.f);
+			Displacement = FVector(0.f, 0.f, 90.f);
 			CurrentWeapon->ShouldReduceDispersion = true;
 			break;
 		case EMovementState::Run_State:
-			Displacement = FVector(0.f, 0.f, 120.f);
+			Displacement = FVector(0.f, 0.f, 70.f);
 			CurrentWeapon->ShouldReduceDispersion = false;
 			break;
 		case EMovementState::Sprint_State:
@@ -270,7 +270,7 @@ void AProjectVortexCharacter::WeaponFireStart(UAnimMontage* Anim)
 void AProjectVortexCharacter::TryReloadWeapon()
 {
 	if (bIsStunned) return;
-	if (CurrentWeapon && ! CurrentWeapon->bWeaponReloading)
+	if (bIsAlive && CurrentWeapon && ! CurrentWeapon->bWeaponReloading)
 	{
 		if (CurrentWeapon->GetWeaponRound() < CurrentWeapon->WeaponSetting.MaxRound && CurrentWeapon->CheckCanWeaponReload())
 		{
@@ -281,7 +281,7 @@ void AProjectVortexCharacter::TryReloadWeapon()
 
 void AProjectVortexCharacter::AttackCharEvent(bool IsAttacking)
 {
-	if (bIsStunned) return;
+	if (bIsStunned || !bIsAlive) return;
 	AWeaponDefault* MyWeapon = nullptr;
 	MyWeapon = GetCurrentWeapon();
 
@@ -431,6 +431,7 @@ float AProjectVortexCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 
 void AProjectVortexCharacter::CharDead()
 {
+	
 	float TimeAnim = 0.0f;
 
 	int32 rnd = FMath::RandHelper(DeadAnims.Num());
@@ -441,14 +442,26 @@ void AProjectVortexCharacter::CharDead()
 	}
 
 	bIsAlive = false;
+
+	if (GetController())
+	{
+		GetController()->UnPossess();
+	}
+	
 	SetCanBeDamaged(false);
-	UnPossessed();
 
 	// Timer ragdoll
-
 	GetWorldTimerManager().SetTimer(TimerHandle_RagdollTimer, this, &AProjectVortexCharacter::EnableRagdoll, TimeAnim, false);
-
 	
+	AttackCharEvent(false);
+
+	CharDead_BP();
+
+}
+
+void AProjectVortexCharacter::CharDead_BP_Implementation()
+{
+	// BP
 }
 
 void AProjectVortexCharacter::EnableRagdoll()
@@ -459,3 +472,13 @@ void AProjectVortexCharacter::EnableRagdoll()
 		GetMesh()->SetSimulatePhysics(true);
 	}
 }
+// START GAME
+// cont on possess
+// cont begin play
+// char begin play
+
+// CHAR DEAD
+// char unp
+// cont unp
+// char begin play
+// cont on possess

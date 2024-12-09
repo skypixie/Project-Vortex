@@ -148,7 +148,7 @@ public:
 	void UpdateStateWeapon(EMovementState NewMovementState);
 	void ChangeDispersionByShot();
 	float GetCurrentDispersion() const;
-	FVector ApplyDispersionToShoot(FVector DirectionShoot) const;
+	FVector ApplyDispersionToShoot(const FVector& DirectionShoot) const;
 	FVector GetFireEndLocation() const;
 	int8 GetNumberProjectileByShot() const;
 

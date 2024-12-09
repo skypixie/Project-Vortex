@@ -27,6 +27,7 @@ public:
 	UInventoryComponent();
 
 	// ============== DELEGATES
+	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	FOnSwitchWeapon OnSwitchWeapon;
 
 	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category="Inventory")
@@ -46,10 +47,10 @@ public:
 
 	// ============== PROPERTIES
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapons")
 	TArray<FWeaponSlot> WeaponSlots;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapons")
 	TArray<FAmmoSlot> AmmoSlots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
@@ -91,5 +92,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interface")
 	void DropWeaponByIndex(int32 ByIndex, FDropItem& DropItemInfo);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FWeaponSlot> GetWeaponSlots();
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FAmmoSlot> GetAmmoSlots();
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void InitInventory(TArray<FWeaponSlot> NewWeaponSlotsInfo, TArray<FAmmoSlot> NewAmmoSlotsInfo);
 
 };
