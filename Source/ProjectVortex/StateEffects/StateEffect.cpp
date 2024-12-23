@@ -9,7 +9,7 @@
 #include "Interface/UGameActor.h"
 
 
-bool UStateEffect::InitObject(AActor* Actor)
+bool UStateEffect::InitObject(AActor* Actor, FName NameBoneHit)
 {
 	myActor = Actor;
 
@@ -35,9 +35,9 @@ void UStateEffect::DestroyObject()
 	this->ConditionalBeginDestroy();
 }
 
-bool UStateEffect_ExecuteOnce::InitObject(AActor* Actor)
+bool UStateEffect_ExecuteOnce::InitObject(AActor* Actor, FName NameBoneHit)
 {
-	Super::InitObject(Actor);
+	Super::InitObject(Actor, NameBoneHit);
 	ExecuteOnce();
 	return true;
 }
@@ -62,9 +62,9 @@ void UStateEffect_ExecuteOnce::ExecuteOnce()
 	DestroyObject();
 }
 
-bool UStateEffect_ExecuteTimer::InitObject(AActor* Actor)
+bool UStateEffect_ExecuteTimer::InitObject(AActor* Actor, FName NameBoneHit)
 {
-	Super::InitObject(Actor);
+	Super::InitObject(Actor, NameBoneHit);
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_EffectTimer, this, &UStateEffect_ExecuteTimer::DestroyObject, Timer, false);
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle_ExecuteTimer, this, &UStateEffect_ExecuteTimer::Execute, RateTime, true);
@@ -74,7 +74,21 @@ bool UStateEffect_ExecuteTimer::InitObject(AActor* Actor)
 		FName NameBoneToAttach;
 		FVector Location = FVector(0);
 
-		ParticleEmitter = UGameplayStatics::SpawnEmitterAttached(
+		USceneComponent* myMesh = Cast<USceneComponent>(myActor->GetComponentByClass(USkeletalMeshComponent::StaticClass()));
+		if (myMesh)
+		{
+			ParticleEmitter = UGameplayStatics::SpawnEmitterAttached(
+			ParticleEffect,
+			myMesh,
+			NameBoneToAttach,
+			Location,
+			FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			false);
+		}
+		else
+		{
+			ParticleEmitter = UGameplayStatics::SpawnEmitterAttached(
 			ParticleEffect,
 			myActor->GetRootComponent(),
 			NameBoneToAttach,
@@ -82,6 +96,9 @@ bool UStateEffect_ExecuteTimer::InitObject(AActor* Actor)
 			FRotator::ZeroRotator,
 			EAttachLocation::SnapToTarget,
 			false);
+		}
+
+		
 	}
 
 	return true;
@@ -108,7 +125,7 @@ void UStateEffect_ExecuteTimer::Execute()
 	}
 }
 
-bool UStateEffect_Stun::InitObject(AActor* Actor)
+bool UStateEffect_Stun::InitObject(AActor* Actor, FName NameBoneHit)
 {
 	myActor = Actor;
 
@@ -212,7 +229,7 @@ void UStateEffect_Stun::Execute()
 //	}
 //}
 
-bool UStateEffect_Immortality::InitObject(AActor* Actor)
+bool UStateEffect_Immortality::InitObject(AActor* Actor, FName NameBoneHit)
 {
 	myActor = Actor;
 

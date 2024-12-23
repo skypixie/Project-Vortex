@@ -322,5 +322,5 @@ class PROJECTVORTEX_API UUserTypes : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable)
-	static void AddEffectSurfaceType(AActor* HitActor, TSubclassOf<UStateEffect> AddEffectClass, EPhysicalSurface SurfaceType);
+	static void AddEffectSurfaceType(AActor* HitActor, FName NameBoneHit, TSubclassOf<UStateEffect> AddEffectClass, EPhysicalSurface SurfaceType);
 };

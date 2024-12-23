@@ -313,7 +313,7 @@ void AWeaponDefault::Fire()
 						}
 						//UGameplayStatics::ApplyDamage(Hit.GetActor(), WeaponSetting.ProjectileSetting.ProjectileDamage, GetInstigatorController(), this, NULL);
 						
-						UUserTypes::AddEffectSurfaceType(Hit.GetActor(), ProjectileInfo.Effect, mySurfaceType);
+						UUserTypes::AddEffectSurfaceType(Hit.GetActor(), Hit.BoneName, ProjectileInfo.Effect, mySurfaceType);
 
 						UGameplayStatics::ApplyPointDamage(Hit.GetActor(), WeaponSetting.ProjectileSetting.ProjectileDamage, Hit.TraceStart, Hit, GetInstigatorController(), this, NULL);
 

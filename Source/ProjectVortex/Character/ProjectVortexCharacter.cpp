@@ -311,7 +311,7 @@ void AProjectVortexCharacter::TryAbilityEnabled()
 		UStateEffect* NewEffect = NewObject<UStateEffect>(this, AbilityEffect);
 		if (NewEffect)
 		{
-			NewEffect->InitObject(this);
+			NewEffect->InitObject(this, NAME_None);
 		}
 	}
 }
@@ -420,7 +420,7 @@ float AProjectVortexCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 			AProjectileDefault* myProjectile = Cast<AProjectileDefault>(DamageCauser);
 			if (myProjectile)
 			{
-				UUserTypes::AddEffectSurfaceType(this, myProjectile->ProjectileSetting.Effect, GetSurfaceType());
+				UUserTypes::AddEffectSurfaceType(this, NAME_None, myProjectile->ProjectileSetting.Effect, GetSurfaceType());
 
 			}
 		}

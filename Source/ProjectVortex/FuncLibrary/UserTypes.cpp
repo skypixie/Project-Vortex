@@ -6,7 +6,7 @@
 #include "Interface/UGameActor.h"
 
 
-void UUserTypes::AddEffectSurfaceType(AActor* TakeEffectActor, TSubclassOf<UStateEffect> AddEffectClass, EPhysicalSurface SurfaceType)
+void UUserTypes::AddEffectSurfaceType(AActor* TakeEffectActor, FName NameBoneHit, TSubclassOf<UStateEffect> AddEffectClass, EPhysicalSurface SurfaceType)
 {
 	/*if (SurfaceType != EPhysicalSurface::SurfaceType_Default && TakeEffectActor && AddEffectClass)
 	{
@@ -120,7 +120,7 @@ void UUserTypes::AddEffectSurfaceType(AActor* TakeEffectActor, TSubclassOf<UStat
 						UStateEffect* NewEffect = NewObject<UStateEffect>(TakeEffectActor, AddEffectClass);
 						if (NewEffect)
 						{
-							NewEffect->InitObject(TakeEffectActor);
+							NewEffect->InitObject(TakeEffectActor, NameBoneHit);
 						}
 					}
 				}
