@@ -231,6 +231,11 @@ AWeaponDefault* AProjectVortexCharacter::GetCurrentWeapon()
 	return CurrentWeapon;
 }
 
+bool AProjectVortexCharacter::GetIsAlive()
+{
+	return bIsAlive;
+}
+
 void AProjectVortexCharacter::WeaponReloadStart(UAnimMontage* Anim)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, TEXT("WeaponReloadStart"));

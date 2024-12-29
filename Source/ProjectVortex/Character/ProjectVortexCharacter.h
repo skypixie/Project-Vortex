@@ -160,6 +160,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AWeaponDefault* GetCurrentWeapon();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool GetIsAlive();
 
 	UFUNCTION(BlueprintCallable)
 	void AttackCharEvent(bool IsAttacking);
